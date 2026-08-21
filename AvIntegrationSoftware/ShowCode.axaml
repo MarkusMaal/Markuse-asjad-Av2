@@ -1,0 +1,31 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="AvIntegrationSoftware.ShowCode" Foreground="White" Background="Black"
+        Title="ShowCode" WindowState="FullScreen" Topmost="True">
+    <Grid>
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+            <Label HorizontalAlignment="Center">Uus seade taotleb ligipääsu sellele arvutile</Label>
+            <Label HorizontalAlignment="Center">Genereerisime tegevuse kontrollimiseks pääsukoodi</Label>
+            <Label Name="CodeText" HorizontalAlignment="Center" FontSize="72">AAAAAAAA</Label>
+            <Label HorizontalAlignment="Center">Juhul kui te ei tunne seda tegevust ära, klõpsake allolevat nuppu</Label>
+            <Button Click="Button_Click" HorizontalAlignment="Center" Margin="0,15,0,0" Background="DarkRed" BorderBrush="Red" Padding="20,5">Keela ligipääs</Button>
+        </StackPanel>
+        <StackPanel HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="25">
+            <Image Source="/Assets/mas_general.png" Width="100" Height="100" HorizontalAlignment="Left"></Image>
+            <Label FontFamily="Calibri,Segoe UI,Ubuntu,sans-serif" FontWeight="Light" FontSize="21" Margin="0,15,0,0">markuse arvuti integratsioonitarkvara</Label>
+        </StackPanel>
+        <StackPanel HorizontalAlignment="Right" VerticalAlignment="Bottom" Orientation="Horizontal" Margin="20">
+            <Label VerticalAlignment="Center" Margin="15,0">Aega jäänud</Label>
+            <Label Name="TimerLabel" FontSize="40">80</Label>
+        </StackPanel>
+    </Grid>
+    <Window.Styles>
+        <Style Selector="StackPanel > Label">
+            <Setter Property="FontSize" Value="16"></Setter>
+            <Setter Property="FontFamily" Value="Segoe UI"></Setter>
+        </Style>
+    </Window.Styles>
+</Window>

@@ -18,6 +18,9 @@ public class DefaultActions
             case "OpenHomeDir":
                 OpenHomeDir();
                 break;
+            case "Exit":
+                App.Exit();
+                break;
             default:
                 throw new NotImplementedException();
         }

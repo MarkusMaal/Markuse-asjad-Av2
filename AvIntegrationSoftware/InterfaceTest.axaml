@@ -1,0 +1,22 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"  Width="400" Height="420"
+        MinWidth="300" MinHeight="370" Closing="Window_Closing" WindowStartupLocation="CenterScreen"
+        x:Class="AvIntegrationSoftware.InterfaceTest"
+        Title="Kasutajaliidese test">
+    <StackPanel HorizontalAlignment="Stretch" VerticalAlignment="Center">
+        <Label HorizontalAlignment="Center" Margin="0, 0,0,15" FontSize="25">Liidese testid</Label>
+        <Button Click="Button_OnClick">Käivitusaken</Button>
+        <Button Click="Button_OnClick">M.A.I.A. kood</Button>
+        <Button Click="Button_OnClick">Verifile kontrolli nurjumine</Button>
+        <Button Click="Button_OnClick">Rakenduse kokkujooksmine</Button>
+        <StackPanel.Styles>
+            <Style Selector="Button">
+                <Setter Property="HorizontalAlignment" Value="Center"></Setter>
+                <Setter Property="Margin" Value="5"></Setter>
+            </Style>
+        </StackPanel.Styles>
+    </StackPanel>
+</Window>

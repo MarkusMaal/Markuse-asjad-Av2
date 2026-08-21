@@ -6,6 +6,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 
@@ -17,10 +18,39 @@ public class App : Application
     private readonly MenuModel _menu = new();
     private TrayIcon? _trayIcon;
     private const int PollRate = 5000;
-    private bool _shutdownNow = false;
+    private bool _shutdownNow;
+    private readonly Splash _splashScreen = new();
+    public static Color[] Scheme;
+    private Watchers fsWatchers = new();
     
     public override void Initialize()
     {
+        _splashScreen.Show();
+        if (File.Exists(Path.Join(MasRoot, "scheme.cfg")))
+        {
+            new Thread(() =>
+            {
+                
+                while (true)
+                {
+                    try
+                    {
+                        var bgfg = File.ReadAllText(Path.Join(MasRoot, "scheme.cfg")).Split(';');
+                        var bgs = bgfg[0].Split(':');
+                        var fgs = bgfg[1].Split(':');
+                        Color[] cols = [Color.FromArgb(255, byte.Parse(bgs[0]), byte.Parse(bgs[1]), byte.Parse(bgs[2])), Color.FromArgb(255, byte.Parse(fgs[0]), byte.Parse(fgs[1]), byte.Parse(fgs[2]))];
+                        Scheme = cols;
+                        Dispatcher.UIThread.Post(() =>
+                        {
+                            _splashScreen.Background = new SolidColorBrush(Color.FromArgb(64, byte.Parse(bgs[0]), byte.Parse(bgs[1]), byte.Parse(bgs[2])));
+                            _splashScreen.Foreground = new SolidColorBrush(cols[1]);
+                        });
+                        return;
+                    }
+                    catch { Thread.Sleep(100); }
+                }
+            }).Start();
+        }
         AvaloniaXamlLoader.Load(this);
     }
 
@@ -28,6 +58,28 @@ public class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            if (desktop.Args.Contains("--interface-test"))
+            {
+                if (_splashScreen.IsVisible) 
+                    _splashScreen.Hide();
+                new InterfaceTest().Show();
+                desktop.ShutdownMode = ShutdownMode.OnLastWindowClose;
+                return;
+            }
+            if (desktop.Args.Contains("/e"))
+            {
+                Crash c = new()
+                {
+                    TechnicalData =
+                    {
+                        Text = File.ReadAllText(Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                            "mas_error.log"))
+                    }
+                };
+                c.Show();
+                desktop.ShutdownMode = ShutdownMode.OnLastWindowClose;
+                return;
+            }
             desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
             desktop.ShutdownRequested += (_, _) =>
             {
@@ -39,6 +91,11 @@ public class App : Application
         new Thread(MenuUpdateThread).Start();
         
         base.OnFrameworkInitializationCompleted();
+        new Thread(() =>
+        {
+            Thread.Sleep(PollRate);
+            Dispatcher.UIThread.Post(() => _splashScreen.Close());
+        }).Start();
     }
 
     private void InitTrayMenu()
@@ -81,8 +138,16 @@ public class App : Application
     {
         while (!_shutdownNow)
         {
+            if (Scheme == null)
+            {
+                Thread.Sleep(100);
+                continue;
+            }
+
+            
             Dispatcher.UIThread.Post(() =>
             {
+                if (_splashScreen.IsVisible) return;
                 foreach (var (i, mi) in _menu.MenuItems.Index())
                 {
                     if (mi.GetState() == null) continue;
@@ -111,5 +176,11 @@ public class App : Application
             });
             Thread.Sleep(PollRate);
         }
+    }
+
+    public static void Exit()
+    {
+        ((IClassicDesktopStyleApplicationLifetime)((App)Current!).ApplicationLifetime!)
+            .TryShutdown(); // will have a delay, up to {PollRate} ms
     }
 }
