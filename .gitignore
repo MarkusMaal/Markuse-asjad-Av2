@@ -1,0 +1,7 @@
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+.idea
+Markuse-asjad-Av2.sln.DotSettings.user
