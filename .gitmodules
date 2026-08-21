@@ -1,0 +1,3 @@
+[submodule "MasCommon"]
+	path = MasCommon
+	url = https://github.com/MarkusMaal/MasCommon.git

@@ -9,6 +9,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
+using MasCommon;
 
 namespace AvIntegrationSoftware;
 
@@ -17,15 +18,39 @@ public class App : Application
     public static readonly string MasRoot = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".mas");
     private readonly MenuModel _menu = new();
     private TrayIcon? _trayIcon;
-    private const int PollRate = 5000;
+    private static int PollRate = 5000;
     private bool _shutdownNow;
     private readonly Splash _splashScreen = new();
     public static Color[] Scheme;
     private Watchers fsWatchers = new();
+    private Verifile vf = new();
+    private static readonly CommonConfig MasConfig = new();
     
     public override void Initialize()
     {
-        _splashScreen.Show();
+        if (File.Exists(Path.Join(MasRoot, "Config.json")))
+        {
+            MasConfig.Load(MasRoot);
+        }
+        else
+        {
+            // default settings
+            MasConfig.PollRate = 5000;
+            MasConfig.AutostartNotes = false;
+            MasConfig.ShowLogo = true;
+            MasConfig.AllowScheduledTasks = true;
+            MasConfig.Save(MasRoot);
+        }
+
+        PollRate = MasConfig.PollRate;
+        if (MasConfig.ShowLogo) _splashScreen.Show();
+        if (MasConfig.AutostartNotes)
+        {
+            if (!File.Exists(Path.Join(App.MasRoot, "noteopen.txt")))
+            {
+                DefaultActions.ParseStr("ToggleDesktopNotes");   
+            }
+        }
         if (File.Exists(Path.Join(MasRoot, "scheme.cfg")))
         {
             new Thread(() =>
@@ -80,7 +105,57 @@ public class App : Application
                 desktop.ShutdownMode = ShutdownMode.OnLastWindowClose;
                 return;
             }
-            desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+
+            desktop.ShutdownMode = ShutdownMode.OnLastWindowClose;
+
+            var vff = new VerifileFail();
+            if (!Verifile.CheckVerifileTamper())
+            {
+                vff.InfoTextBlock.Text += "\n\nVeakood: VF_INCOMPATIBLE_HASH";
+                vff.Show();
+                return;
+            }
+
+            var vfAttestationResult = vf.MakeAttestation();
+            switch (vfAttestationResult)
+            {
+                case "VERIFIED":
+                    desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+                    break;
+                case "FAILED":
+                    vff.InfoTextBlock.Text += "\n\nVeakood: VF_FAILED";
+                    vff.Show();
+                    break;
+                case "BYPASS":
+                    vff.InfoTextBlock.Text += "\n\nVeakood: VF_BYPASS";
+                    vff.Show();
+                    break;
+                case "LEGACY":
+                    vff.InfoTextBlock.Text += "\n\nVeakood: VF_LEGACY";
+                    vff.Show();
+                    break;
+                case "TAMPERED":
+                    vff.InfoTextBlock.Text += "\n\nVeakood: VF_TAMPERED";
+                    vff.Show();
+                    break;
+                case "FOREIGN":
+                    vff.InfoTextBlock.Text += "\n\nVeakood: VF_FOREIGN";
+                    vff.Show();
+                    break;
+            }
+
+            if (!Verifile.CheckFiles(Verifile.FileScope.IntegrationSoftware))
+            {
+                vff.InfoTextBlock.Text += "\n\nVeakood: VF_MISSING_FILES";
+                vff.Show();
+                return;
+            }
+
+            if (vfAttestationResult != "VERIFIED")
+            {
+                return;
+            }
+            
             desktop.ShutdownRequested += (_, _) =>
             {
                 _shutdownNow = true;

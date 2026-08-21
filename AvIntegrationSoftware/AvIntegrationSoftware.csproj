@@ -32,4 +32,7 @@
     <ItemGroup>
         <AvaloniaResource Include="Assets\**" />
     </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\MasCommon\MasCommon.csproj" />
+    </ItemGroup>
 </Project>

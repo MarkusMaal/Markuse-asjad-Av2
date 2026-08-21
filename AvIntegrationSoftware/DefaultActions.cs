@@ -21,6 +21,9 @@ public class DefaultActions
             case "Exit":
                 App.Exit();
                 break;
+            case "ToggleAllowCode":
+                Program.AllowCode = !Program.AllowCode;
+                break;
             default:
                 throw new NotImplementedException();
         }
