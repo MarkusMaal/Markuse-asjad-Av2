@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace AvIntegrationSoftware;
 
@@ -39,11 +40,34 @@ public class MenuItemModel
                         UseShellExecute = false,
                         CreateNoWindow = true,
                         WindowStyle = ProcessWindowStyle.Hidden,
+                        WorkingDirectory = Path.Join(App.MasRoot, "Markuse asjad"),
                         RedirectStandardError = true,
                         RedirectStandardOutput = true
                     }
                 };
                 p.Start();
+                break;
+            case "web":
+                try
+                {
+                    Process.Start(actionRunnable);
+                }
+                catch
+                {
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    {
+                        var url = actionRunnable.Replace("&", "^&");
+                        Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
+                    }
+                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                    {
+                        Process.Start("xdg-open", actionRunnable);
+                    }
+                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                    {
+                        Process.Start("open", actionRunnable);
+                    }
+                }
                 break;
         }
     }
@@ -60,10 +84,24 @@ public class MenuItemModel
             case "FILE_EXISTS":
                 CurrentState = File.Exists(checkable) ? yesLabel : noLabel;
                 return;
+            case "IS_TRUE":
+                CurrentState = checkable switch
+                {
+                    "AllowCode" => Program.AllowCode ? yesLabel : noLabel,
+                    "CodeOpen" => Program.CodeOpen ? yesLabel : noLabel,
+                    "FlashDrivesAvailable" => AreThereAnyFlashDrivesMounted() ? yesLabel : noLabel, 
+                    _ => CurrentState
+                };
+                return;
             case "PROCESS_RUNNING":
                 CurrentState = Process.GetProcessesByName(checkable).Length > 0 ? yesLabel : noLabel;
                 return;
         }
+    }
+
+    private static bool AreThereAnyFlashDrivesMounted()
+    {
+        return DriveInfo.GetDrives().Any(di => File.Exists(Path.Join(di.RootDirectory.FullName, "E_INFO", "edition.txt")) && File.Exists(Path.Join(di.RootDirectory.FullName, "NTFS", "config.sys")));
     }
 
     public void SetState(string newState)

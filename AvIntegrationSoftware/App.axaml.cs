@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -192,7 +193,9 @@ public class App : Application
                     subMenu.Items.Add(new NativeMenuItem(subItem.GetState()!.Label)
                     {
                         Command = new MenuCommand(() => subItem.Execute()),
-                        Icon = new Bitmap(submenuRealIconPath)
+                        Icon = new Bitmap(submenuRealIconPath),
+                        IsVisible = Debugger.IsAttached || !subItem.MenuIdentifier!.Contains("Debug"),
+                        IsEnabled = subItem.GetState()!.StateIdentifier != "Gray"
                     });
                 }
             }
@@ -204,7 +207,9 @@ public class App : Application
                     mi.Execute();
                 }),
                 Icon = new Bitmap(realIconPath),
-                Menu = subMenu
+                Menu = subMenu,
+                IsVisible = Debugger.IsAttached || !mi.MenuIdentifier!.Contains("Debug"),
+                IsEnabled = mi.GetState()!.StateIdentifier != "Gray"
             });
         }
     }
@@ -228,13 +233,7 @@ public class App : Application
                     if (mi.GetState() == null) continue;
                     var previousState = mi.GetState();
                     mi.PollState();
-                    if (previousState == mi.GetState()) continue;
-                    ((NativeMenuItem)_trayIcon!.Menu!.Items[i]).Header = mi.GetState()!.Label;
-                    if (previousState!.IconPath != mi.GetState()!.IconPath)
-                    {
-                        var realIconPath = mi.GetState()!.IconPath.Replace("%MAS_ROOT%", MasRoot);
-                        ((NativeMenuItem)_trayIcon!.Menu!.Items[i]).Icon = new Bitmap(realIconPath);
-                    }
+                    
                     foreach (var (j, smi) in (((NativeMenuItem)_trayIcon.Menu!.Items[i]).Menu ?? []).Index())
                     {
                         if (mi.SubItems == null) continue;
@@ -243,9 +242,18 @@ public class App : Application
                         mi.SubItems[j].PollState();
                         if (submenuPreviousState == mi.SubItems[j].GetState()) continue;
                         ((NativeMenuItem)smi).Header = mi.SubItems[j].GetState()!.Label;
+                        ((NativeMenuItem)smi).IsEnabled = mi.SubItems[j].GetState()!.StateIdentifier != "Gray";
                         if (submenuPreviousState!.IconPath == mi.SubItems[j].GetState()!.IconPath) continue;
                         var submenuRealIconPath = mi.SubItems[j].GetState()!.IconPath.Replace("%MAS_ROOT%", MasRoot);
                         ((NativeMenuItem)smi).Icon = new Bitmap(submenuRealIconPath);
+                    }
+                    if (previousState == mi.GetState()) continue;
+                    ((NativeMenuItem)_trayIcon!.Menu!.Items[i]).Header = mi.GetState()!.Label;
+                    ((NativeMenuItem)_trayIcon!.Menu!.Items[i]).IsEnabled = mi.GetState()!.StateIdentifier != "Gray";
+                    if (previousState!.IconPath != mi.GetState()!.IconPath)
+                    {
+                        var realIconPath = mi.GetState()!.IconPath.Replace("%MAS_ROOT%", MasRoot);
+                        ((NativeMenuItem)_trayIcon!.Menu!.Items[i]).Icon = new Bitmap(realIconPath);
                     }
                 }
             });
