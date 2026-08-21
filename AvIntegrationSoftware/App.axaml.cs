@@ -233,7 +233,8 @@ public class App : Application
                     if (mi.GetState() == null) continue;
                     var previousState = mi.GetState();
                     mi.PollState();
-                    
+                    if (_trayIcon == null) continue;
+                    if (_trayIcon.Menu?.Items.Count <= i) continue;
                     foreach (var (j, smi) in (((NativeMenuItem)_trayIcon.Menu!.Items[i]).Menu ?? []).Index())
                     {
                         if (mi.SubItems == null) continue;
