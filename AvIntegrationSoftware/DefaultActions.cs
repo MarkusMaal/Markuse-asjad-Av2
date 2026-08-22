@@ -36,7 +36,7 @@ public class DefaultActions
                     var osExec = os switch
                     {
                         "win" => "Markuse mälupulk 2.0.exe",
-                        "linux" => "MarkuseM2lupulk.AppImage",
+                        "linux" => "Markuse mälupulk 2.0",
                         "osx" => "Markuse mälupulk 2.0.app",
                         _ => ""
                     };
