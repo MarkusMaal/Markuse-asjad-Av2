@@ -36,6 +36,7 @@ internal abstract class Program
     private static AppBuilder BuildAvaloniaApp()
         => AppBuilder.Configure<App>()
             .UsePlatformDetect()
+            .With(new MacOSPlatformOptions { ShowInDock = false, DisableDefaultApplicationMenuItems = true })
 #if DEBUG
             .WithDeveloperTools()
 #endif
