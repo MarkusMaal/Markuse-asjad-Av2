@@ -10,7 +10,9 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
+using Avalonia.Styling;
 using Avalonia.Threading;
+using Avalonia.Controls.Primitives;
 using MasCommon;
 
 namespace AvIntegrationSoftware;
@@ -80,6 +82,16 @@ public class App : Application
                         {
                             _splashScreen.Background = new SolidColorBrush(Color.FromArgb(64, byte.Parse(bgs[0]), byte.Parse(bgs[1]), byte.Parse(bgs[2])));
                             _splashScreen.Foreground = new SolidColorBrush(cols[1]);
+                            if (OperatingSystem.IsWindows())
+                            {
+                                Styles.Add(new Style(x => x.OfType<MenuItem>())
+                                {
+                                    Setters = {
+                                        new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(Scheme[0])),
+                                        new Setter(TemplatedControl.ForegroundProperty, new SolidColorBrush(Scheme[1]))
+                                    }
+                                });
+                            }
                         });
                         return;
                     }
@@ -300,26 +312,35 @@ public class App : Application
                     mi.PollState();
                     if (_trayIcon == null) continue;
                     if (_trayIcon.Menu?.Items.Count <= i) continue;
-                    foreach (var (j, smi) in (((NativeMenuItem)_trayIcon.Menu!.Items[i]).Menu ?? []).Index())
+                    // some operating systems may not neccessarily have the menu items in the same order
+                    // we added them in, so we have to find the corresponding menu item by name instead
+                    // of the index to make sure states are updated correctly
+                    var nativeMenu = (NativeMenuItem)_trayIcon.Menu!.Items.First(p => ((NativeMenuItem)p).Header == mi.GetState()?.Label);
+                    if (nativeMenu == null && mi.SubItems?.Length > 0)
+                    {
+                        throw new NullReferenceException();
+                    }
+                    foreach (var (j, smi) in (nativeMenu?.Menu ?? []).Index())
                     {
                         if (mi.SubItems == null) continue;
-                        if (mi.SubItems![j].GetState() == null) continue;
-                        var submenuPreviousState = mi.SubItems[j].GetState();
-                        mi.SubItems[j].PollState();
-                        if (submenuPreviousState == mi.SubItems[j].GetState()) continue;
-                        ((NativeMenuItem)smi).Header = mi.SubItems[j].GetState()!.Label;
-                        ((NativeMenuItem)smi).IsEnabled = mi.SubItems[j].GetState()!.StateIdentifier != "Gray";
-                        if (submenuPreviousState!.IconPath == mi.SubItems[j].GetState()!.IconPath) continue;
-                        var submenuRealIconPath = mi.SubItems[j].GetState()!.IconPath.Replace("%MAS_ROOT%", MasRoot);
+                        var subItemLinq = mi.SubItems?.First(p => p.GetState()?.Label == ((NativeMenuItem)smi).Header);
+                        if (subItemLinq?.GetState() == null) continue;
+                        var submenuPreviousState = subItemLinq.GetState();
+                        subItemLinq.PollState();
+                        if (submenuPreviousState == subItemLinq.GetState()) continue;
+                        ((NativeMenuItem)smi).Header = subItemLinq.GetState()!.Label;
+                        ((NativeMenuItem)smi).IsEnabled = subItemLinq.GetState()!.StateIdentifier != "Gray";
+                        if (submenuPreviousState!.IconPath == subItemLinq.GetState()!.IconPath) continue;
+                        var submenuRealIconPath = subItemLinq.GetState()!.IconPath.Replace("%MAS_ROOT%", MasRoot);
                         ((NativeMenuItem)smi).Icon = new Bitmap(submenuRealIconPath);
                     }
                     if (previousState == mi.GetState()) continue;
-                    ((NativeMenuItem)_trayIcon!.Menu!.Items[i]).Header = mi.GetState()!.Label;
-                    ((NativeMenuItem)_trayIcon!.Menu!.Items[i]).IsEnabled = mi.GetState()!.StateIdentifier != "Gray";
+                    nativeMenu?.Header = mi.GetState()!.Label;
+                    nativeMenu?.IsEnabled = mi.GetState()!.StateIdentifier != "Gray";
                     if (previousState!.IconPath != mi.GetState()!.IconPath)
                     {
                         var realIconPath = mi.GetState()!.IconPath.Replace("%MAS_ROOT%", MasRoot);
-                        ((NativeMenuItem)_trayIcon!.Menu!.Items[i]).Icon = new Bitmap(realIconPath);
+                        nativeMenu?.Icon = new Bitmap(realIconPath);
                     }
                 }
             });

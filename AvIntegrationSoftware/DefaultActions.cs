@@ -45,7 +45,7 @@ public class DefaultActions
                     var p = new Process();
                     if (File.Exists(fullPath) && OperatingSystem.IsWindows())
                     {
-                        p.StartInfo.FileName = Path.Join(App.MasRoot, osExec);
+                        p.StartInfo.FileName = Path.Join(fullPath);
                     }
                     else if (File.Exists(fullPath) && OperatingSystem.IsLinux())
                     {
