@@ -9,7 +9,7 @@
     <Grid RowDefinitions="200,*,50">
         <StackPanel Grid.Row="0">
             <StackPanel Orientation="Horizontal" Height="150" VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,30,0,0">
-                <Image Source="/Assets/mas_general.png" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="10,0">
+                <Image Source="/Assets/mas_integration.png" RenderOptions.BitmapInterpolationMode="HighQuality" HorizontalAlignment="Left" VerticalAlignment="Top" Width="200" Margin="10,0">
 
                 </Image>
                 <TextBlock VerticalAlignment="Center" FontSize="30" Margin="0,0,10,0">Tohoh, see on nüüd küll piinlik!</TextBlock>

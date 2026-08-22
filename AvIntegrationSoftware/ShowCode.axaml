@@ -13,8 +13,8 @@
             <Label HorizontalAlignment="Center">Juhul kui te ei tunne seda tegevust ära, klõpsake allolevat nuppu</Label>
             <Button Click="Button_Click" HorizontalAlignment="Center" Margin="0,15,0,0" Background="DarkRed" BorderBrush="Red" Padding="20,5">Keela ligipääs</Button>
         </StackPanel>
-        <StackPanel HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="25">
-            <Image Source="/Assets/mas_general.png" Width="100" Height="100" HorizontalAlignment="Left"></Image>
+        <StackPanel HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="25" >
+            <Image Source="/Assets/mas_integration.png" Width="100" Height="100" RenderOptions.BitmapInterpolationMode="HighQuality" HorizontalAlignment="Left"></Image>
             <Label FontFamily="Calibri,Segoe UI,Ubuntu,sans-serif" FontWeight="Light" FontSize="21" Margin="0,15,0,0">markuse arvuti integratsioonitarkvara</Label>
         </StackPanel>
         <StackPanel HorizontalAlignment="Right" VerticalAlignment="Bottom" Orientation="Horizontal" Margin="20">

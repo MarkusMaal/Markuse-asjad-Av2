@@ -1,26 +1,13 @@
 using System;
 using System.Windows.Input;
-using Avalonia.Controls;
 
 namespace AvIntegrationSoftware;
 
-public class MenuCommand : ICommand
+public class MenuCommand(Action execute, Func<bool>? canExecute = null) : ICommand
 {
-    private readonly Action _execute;
-    private readonly Func<bool>? _canExecute;
+    public bool CanExecute(object? parameter) => canExecute?.Invoke() ?? true;
 
-    public MenuCommand(Action execute, Func<bool>? canExecute = null)
-    {
-        _execute = execute;
-        _canExecute = canExecute;
-    }
-
-    public bool CanExecute(object? parameter) => _canExecute?.Invoke() ?? true;
-
-    public void Execute(object? parameter) => _execute();
+    public void Execute(object? parameter) => execute();
 
     public event EventHandler? CanExecuteChanged;
-    
-    public void RaiseCanExecuteChanged()
-        => CanExecuteChanged?.Invoke(this, EventArgs.Empty);
 }

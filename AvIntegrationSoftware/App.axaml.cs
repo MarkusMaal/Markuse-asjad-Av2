@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -14,26 +15,35 @@ using MasCommon;
 
 namespace AvIntegrationSoftware;
 
+[SuppressMessage("Usage", "CA2211:Non-constant fields should not be visible")]
 public class App : Application
 {
     public static readonly string MasRoot = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".mas");
     private readonly MenuModel _menu = new();
     private TrayIcon? _trayIcon;
-    private static int PollRate = 5000;
+    private static int _pollRate = 5000;
     private bool _shutdownNow;
     private readonly Splash _splashScreen = new();
-    public static Color[] Scheme;
-    private Watchers fsWatchers = new();
-    private Verifile vf = new();
+    public static Color[] Scheme = [];
+    private readonly Verifile _vf = new();
     private static readonly CommonConfig MasConfig = new();
+    private bool _featureTripped;
+    public static string Features = "";
+    private readonly TimeSpan _checkInterval = new(1, 0, 0);
+    private DateTime _nextCheck;
+    // ReSharper disable once UnusedMember.Local
+    private Watchers _watchers = new(); // this line must NOT be removed, otherwise M.A.I.A. integration will not work
     
     public override void Initialize()
     {
+        _nextCheck = DateTime.Now.Add(_checkInterval);
+        TryRefreshFeatures();
+        
         if (File.Exists(Path.Join(MasRoot, "Config.json")))
         {
             MasConfig.Load(MasRoot);
         }
-        else
+        else if (Directory.Exists(MasRoot))
         {
             // default settings
             MasConfig.PollRate = 5000;
@@ -43,7 +53,7 @@ public class App : Application
             MasConfig.Save(MasRoot);
         }
 
-        PollRate = MasConfig.PollRate;
+        _pollRate = MasConfig.PollRate;
         if (MasConfig.ShowLogo) _splashScreen.Show();
         if (MasConfig.AutostartNotes)
         {
@@ -80,6 +90,22 @@ public class App : Application
         AvaloniaXamlLoader.Load(this);
     }
 
+    private static void TryRefreshFeatures()
+    {
+        if (!File.Exists(Path.Join(MasRoot, "edition.txt"))) return;
+        var es = File.OpenText(Path.Join(MasRoot, "edition.txt"));
+        try
+        {
+            for (var i = 0; i < 8; i++) es.ReadLine();
+            Features = es.ReadLine() ?? Features;
+            es.Close();
+        }
+        catch
+        {
+            // failed to read means no features available
+        }
+    }
+
     public override void OnFrameworkInitializationCompleted()
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
@@ -112,12 +138,13 @@ public class App : Application
             var vff = new VerifileFail();
             if (!Verifile.CheckVerifileTamper())
             {
-                vff.InfoTextBlock.Text += "\n\nVeakood: VF_INCOMPATIBLE_HASH";
+                vff.InfoTextBlock.Text = $"Verifile 2.x räsi ei ole usaldusväärne. Uuendage integratsiooniprogrammi ja/või asendage fail \"{Path.Join(MasRoot, "verifile2.jar")}\" uuema/ühilduva versiooniga.";
                 vff.Show();
+                if (_splashScreen.IsVisible) _splashScreen.Close();
                 return;
             }
 
-            var vfAttestationResult = vf.MakeAttestation();
+            var vfAttestationResult = _vf.MakeAttestation();
             switch (vfAttestationResult)
             {
                 case "VERIFIED":
@@ -145,18 +172,14 @@ public class App : Application
                     break;
             }
 
-            if (!Verifile.CheckFiles(Verifile.FileScope.IntegrationSoftware))
+            if (vfAttestationResult != "VERIFIED" && _splashScreen.IsVisible) _splashScreen.Close();
+            if (vfAttestationResult == "VERIFIED" && !Verifile.CheckFiles(Verifile.FileScope.IntegrationSoftware))
             {
                 vff.InfoTextBlock.Text += "\n\nVeakood: VF_MISSING_FILES";
                 vff.Show();
-                return;
             }
+            if (vfAttestationResult != "VERIFIED") return;
 
-            if (vfAttestationResult != "VERIFIED")
-            {
-                return;
-            }
-            
             desktop.ShutdownRequested += (_, _) =>
             {
                 _shutdownNow = true;
@@ -169,7 +192,7 @@ public class App : Application
         base.OnFrameworkInitializationCompleted();
         new Thread(() =>
         {
-            Thread.Sleep(PollRate);
+            Thread.Sleep(_pollRate);
             Dispatcher.UIThread.Post(() => _splashScreen.Close());
         }).Start();
     }
@@ -177,7 +200,7 @@ public class App : Application
     private void InitTrayMenu()
     {
         _trayIcon = TrayIcon.GetIcons(this)!.First();
-        foreach (var mi in _menu.MenuItems)
+        foreach (var mi in _menu.MenuItems ?? [])
         {
             mi.PollState();
             if (mi.GetState() == null) continue;
@@ -195,7 +218,7 @@ public class App : Application
                         Command = new MenuCommand(() => subItem.Execute()),
                         Icon = new Bitmap(submenuRealIconPath),
                         IsVisible = Debugger.IsAttached || !subItem.MenuIdentifier!.Contains("Debug"),
-                        IsEnabled = subItem.GetState()!.StateIdentifier != "Gray"
+                        IsEnabled = subItem.HasRequiredFeatures() && subItem.GetState()!.StateIdentifier != "Gray"
                     });
                 }
             }
@@ -209,7 +232,7 @@ public class App : Application
                 Icon = new Bitmap(realIconPath),
                 Menu = subMenu,
                 IsVisible = Debugger.IsAttached || !mi.MenuIdentifier!.Contains("Debug"),
-                IsEnabled = mi.GetState()!.StateIdentifier != "Gray"
+                IsEnabled = mi.HasRequiredFeatures() && mi.GetState()!.StateIdentifier != "Gray"
             });
         }
     }
@@ -218,17 +241,59 @@ public class App : Application
     {
         while (!_shutdownNow)
         {
+            if (_featureTripped) return;
             if (Scheme == null)
             {
                 Thread.Sleep(100);
                 continue;
             }
 
+            if (DateTime.Now > _nextCheck)
+            {
+                _nextCheck = DateTime.Now.Add(_checkInterval);
+                TryRefreshFeatures();
+                if (!Verifile.CheckVerifileTamper() || !Verifile.CheckFiles(Verifile.FileScope.IntegrationSoftware) || !_vf.IsVerified() || !Features.Contains("IP"))
+                {
+                    Console.WriteLine("Integrity checks failed: This may be due to a recent hardware or software change!");
+                    Environment.Exit(255);
+                }
+                if (Debugger.IsAttached) Console.WriteLine($"Integrity checks passed: Next check at {_nextCheck.ToShortTimeString()}");
+            }
+
+            if (!Directory.Exists(Path.Join(MasRoot, "integration_data"))) return;
+
             
             Dispatcher.UIThread.Post(() =>
             {
                 if (_splashScreen.IsVisible) return;
-                foreach (var (i, mi) in _menu.MenuItems.Index())
+                if (!Features.Contains("IP"))
+                {
+                    _featureTripped = true;
+                    TrayIcon.SetIcons(this, null);
+                    var vff = new VerifileFail
+                    {
+                        InfoTextBlock =
+                        {
+                            Text = "Integratsioonitarkvara ei ole selle Markuse asjade väljaande jaoks saadaval"
+                        }
+                    };
+                    vff.Show();
+                    new Thread(() =>
+                    {
+                        var exit = false;
+                        while (!exit)
+                        {
+                            Dispatcher.UIThread.Post(() =>
+                            {
+                                if (!vff.IsVisible) exit = true;
+                            });
+                            Thread.Sleep(_pollRate);
+                        }
+
+                        Environment.Exit(0);
+                    }).Start();
+                }
+                foreach (var (i, mi) in (_menu.MenuItems ?? []).Index())
                 {
                     if (mi.GetState() == null) continue;
                     var previousState = mi.GetState();
@@ -258,7 +323,7 @@ public class App : Application
                     }
                 }
             });
-            Thread.Sleep(PollRate);
+            Thread.Sleep(_pollRate);
         }
     }
 

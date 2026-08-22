@@ -6,7 +6,7 @@
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
     <TrayIcon.Icons>
         <TrayIcons>
-            <TrayIcon Icon="/Assets/mas_general.png" ToolTipText="Markuse arvuti integratsioonitarkvara">
+            <TrayIcon Icon="/Assets/mas_integration.png" ToolTipText="Markuse arvuti integratsioonitarkvara">
                 <TrayIcon.Menu>
                     <NativeMenu>
                     </NativeMenu>

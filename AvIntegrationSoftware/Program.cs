@@ -8,8 +8,13 @@ namespace AvIntegrationSoftware;
 internal abstract class Program
 {
     public static bool CodeOpen = false;
-    public static bool AllowCode = true;
-    
+
+    public static bool AllowCode
+    {
+        get => App.Features.Contains("RD") && field;
+        set;
+    } = true;
+
     // Initialization code. Don't use any Avalonia, third-party APIs or any
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
     // yet and stuff might break.

@@ -6,7 +6,7 @@ namespace AvIntegrationSoftware;
 
 public class MenuModel
 {
-    public MenuItemModel[] MenuItems { get; set; }
+    public MenuItemModel[]? MenuItems { get; set; }
 
     public void Load()
     {

@@ -8,16 +8,18 @@ namespace AvIntegrationSoftware;
 public class MenuItemModel
 {
     public string? MenuIdentifier { get; set; }
-    public MenuItemModel[]? SubItems { get; set; } = null;
+    public MenuItemModel[]? SubItems { get; set; }
 
     private string CurrentState { get; set; } = "Default";
-    public MenuState[] States { get; set; }
+    public required MenuState[] States { get; set; }
     
     public MenuState? GetDefault() => States.FirstOrDefault(p => p.StateIdentifier == "Default");
     public MenuState? GetState()  => States.FirstOrDefault(p => p.StateIdentifier == CurrentState);
     public MenuState[] GetAll() => States;
     
-    public string? StatePoller { get; set; } = null;
+    public string? StatePoller { get; set; }
+
+    public string? RequiredFeatures { get; set; }
 
     public void Execute()
     {
@@ -71,6 +73,8 @@ public class MenuItemModel
                 break;
         }
     }
+
+    public bool HasRequiredFeatures() => (RequiredFeatures?.Split('-') ?? []).All(segment => App.Features.Contains(segment));
     
     public void PollState()
     {
@@ -112,8 +116,8 @@ public class MenuItemModel
 
 public class MenuState
 {
-    public string StateIdentifier { get; set; }
-    public string Label { get; set; }
-    public string IconPath { get; set; }
-    public string Action { get; set; }
+    public required string StateIdentifier { get; set; }
+    public required string Label { get; set; }
+    public required string IconPath { get; set; }
+    public required string Action { get; set; }
 }

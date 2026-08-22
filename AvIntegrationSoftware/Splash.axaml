@@ -14,13 +14,13 @@
         IsHitTestVisible="True" CanResize="False" BorderThickness="0"
         Width="400" Height="245" WindowStartupLocation="CenterScreen"
         BorderBrush="Transparent" WindowState="Normal" ShowInTaskbar="False"
-        Foreground="White"
-        Icon="Assets/mas_general.png">
-    <Grid>
-        <Rectangle Name="Backglass" Fill="#8009" Width="400" Height="245">
+        Foreground="White" Loaded="Control_OnLoaded"
+        Icon="Assets/mas_integration.png" DataContext="{Binding RelativeSource={RelativeSource Self}}">
+    <Grid RowDefinitions="*,Auto,30">
+        <Rectangle Grid.Row="0" Grid.RowSpan="3" Name="Backglass" Fill="#8009" Width="400" Height="245">
 
         </Rectangle>
-        <Polygon Points="0,0 400,0 0,245" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Polygon Grid.Row="0" Grid.RowSpan="3" Points="0,0 400,0 0,245" HorizontalAlignment="Center" VerticalAlignment="Center">
             <Polygon.Fill>
                 <LinearGradientBrush StartPoint="200,0" EndPoint="200,245">
                     <GradientStop Offset="0.0" Color="#4fff"></GradientStop>
@@ -28,13 +28,13 @@
                 </LinearGradientBrush>
             </Polygon.Fill>
         </Polygon>
-        <StackPanel VerticalAlignment="Center">
-            <Image Source="Assets/mas_general.png" Name="DevicePicture" MaxWidth="150"></Image>
-            <Label FontFamily="Segoe UI,Ubuntu,sans-serif"
-                   FontSize="30" HorizontalAlignment="Center"
-                   Margin="0,10" FontWeight="SemiLight"
-                   Name="DeviceLabel">markuse asjad</Label>
-            <Label HorizontalAlignment="Center" FontSize="10">© Markus Maal 2026</Label>
-        </StackPanel>
+        <Image Grid.Row="0" Source="Assets/mas_integration.png" Name="IntegrationPicutre" MaxWidth="150" RenderOptions.BitmapInterpolationMode="HighQuality"></Image>
+        <TextBlock Grid.Row="1" FontFamily="Segoe UI,Ubuntu,sans-serif"
+               FontSize="28" HorizontalAlignment="Center" VerticalAlignment="Center"
+               Margin="0,10" FontWeight="SemiLight" TextAlignment="Center"
+               Name="DeviceLabel" TextWrapping="Wrap" Text=""></TextBlock>
+        <Label Grid.Row="2" HorizontalAlignment="Center" FontSize="10" Content="{Binding Copyright}"></Label>
+        <ProgressBar Grid.Row="2" IsIndeterminate="True" Value="1" Maximum="100" VerticalAlignment="Bottom"></ProgressBar>
+        
     </Grid>
 </Window>

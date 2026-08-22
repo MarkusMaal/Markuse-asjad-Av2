@@ -19,7 +19,7 @@ public class Watchers
         InitializeWatcher("*.*", _checkMaiaTrigger, new FileSystemEventHandler(CheckMaiaFiles));
     }
     // Create a new watcher
-    private void InitializeWatcher(string filename, FileSystemWatcher watcher, FileSystemEventHandler fn)
+    private static void InitializeWatcher(string filename, FileSystemWatcher watcher, FileSystemEventHandler fn)
     {
         watcher.NotifyFilter = /*NotifyFilters.Attributes
                                | NotifyFilters.CreationTime
@@ -36,7 +36,7 @@ public class Watchers
         watcher.EnableRaisingEvents = true;
     }
     
-    private void CheckMaiaFiles(object sender, FileSystemEventArgs e)
+    private static void CheckMaiaFiles(object sender, FileSystemEventArgs e)
     {
         if (!e.FullPath.EndsWith("request_permission.maia") || (e.ChangeType == WatcherChangeTypes.Deleted)) return;
         // M.A.I.A. ligipääsu taotlemine
@@ -49,8 +49,8 @@ public class Watchers
             {
                 ShowCode sc = new()
                 {
-                    bg = App.Scheme[0],
-                    fg = App.Scheme[1]
+                    Bg = App.Scheme[0],
+                    Fg = App.Scheme[1]
                 };
                 sc.Show(); 
             });
@@ -61,7 +61,7 @@ public class Watchers
         }
     }
     // Error handlers
-    private void OnError(object source, ErrorEventArgs e)
+    private static void OnError(object source, ErrorEventArgs e)
     {
         if (e.GetException().GetType() == typeof(InternalBufferOverflowException))
         {
@@ -75,13 +75,13 @@ public class Watchers
     }
 
 
-    static void NotAccessibleError(FileSystemWatcher source, ErrorEventArgs e)
+    private static void NotAccessibleError(FileSystemWatcher source, ErrorEventArgs e)
     {
         source.EnableRaisingEvents = false;
-        int iMaxAttempts = 120;
-        int iTimeOut = 30000;
-        int i = 0;
-        while (source.EnableRaisingEvents == false && i < iMaxAttempts)
+        const int iMaxAttempts = 120;
+        const int iTimeOut = 30000;
+        var i = 0;
+        while (!source.EnableRaisingEvents && i < iMaxAttempts)
         {
             i += 1;
             try

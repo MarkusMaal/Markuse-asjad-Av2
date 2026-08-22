@@ -3,7 +3,6 @@ using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml;
 
 namespace AvIntegrationSoftware;
 
@@ -22,10 +21,11 @@ public partial class InterfaceTest : Window
     private void Button_OnClick(object? sender, RoutedEventArgs e)
     {
         var app = (App?)Application.Current;
+        if (app == null) return;
         switch ((sender as Button)?.Content)
         {
             case "Tegumiriba menüü":
-                TrayIcon.GetIcons(app).First().IsVisible = true;
+                TrayIcon.GetIcons(app)?.First().IsVisible = true;
                 break;
             case "Käivitusaken":
                 new Splash().Show();
@@ -37,7 +37,8 @@ public partial class InterfaceTest : Window
                 new VerifileFail().Show();
                 break;
             case "Rakenduse kokkujooksmine":
-                throw new Exception("End-user manually initiated a software crash");
+                new Crash().Show();
+                break;
         }
     }
 }
