@@ -7,6 +7,10 @@ Uued Markuse arvuti asjade programmid, mis vastavad Markuse asjad Av2 standardit
 
 ![Integratsiooni logo](.img/integration_s.png)
 
+### Ühilduvad väljaanded
+* Premium (`IP` erifunktsiooniga)
+* Pro (`IP` erifunktsiooniga)
+
 ### Funktsioonid
 
 * Verifile 2.x ühilduvus
@@ -105,3 +109,27 @@ Kui soovite testida erinevate akende funktsionaalsust, käivitage programm param
   * Koodiviga, analüüsi siluriga
 * Väljaanne ei toeta integratsiooniprogrammi (mõni sekund pärast käivitumist)
   * Väljaande erifunktsioonide listis puudub märge integratsiooniprogrammi (IP) jaoks
+
+## Seadmehaldur
+
+![Integratsiooni logo](.img/devmgr_s.png)
+
+### Ühilduvad väljaanded
+* Premium (`RD` erifunktsiooniga)
+* Pro (`RD` funktsiooniga)
+
+### Funktsioonid
+
+* Seadmete lisamine/eemaldamine kaugjuhtimiseks (M.A.I.A. või MasAPI jaoks)
+* Lisatud seadmete kuvamine listis koos ikoonidega
+* Seadme lisamisel IP aadressi valideerimine
+* Vajalike failide olemasolu kontrollimine ja ebaõnnestumisel kasutajale vastava veateate kuvamine
+
+### Konfigureerimine
+
+* Loo Markuse asjade juurkataloogis "mas_neoglass" kaust ja lisa sinna ikoonid erinevate seadmete jaoks, mida see programm otsib
+* Klooni maia Markuse asjade juurkataloogi (alamkaust "maia") või lihtsalt loo tühi kaust nimega "maia"
+* Lisa sinna kausta tühi fail nimega "whitelist.txt" kui seda seal pole
+* Valikuline väljaande funktsioon "RD" peab olema sisse lülitatud
+* Lisa otsetee Integratsiooniprogrammi menüüsse (vt Integratsiooniprogramm > Konfigureerimine)
+* Taaskäivita Markuse asjad (juhtpaneeli kaudu)
