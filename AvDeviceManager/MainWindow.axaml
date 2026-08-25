@@ -1,0 +1,47 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        MinWidth="338" MinHeight="238"
+        mc:Ignorable="d" Width="512" Height="400" Icon="Assets\mas_devmgr.png"
+        x:Class="AvDeviceManager.MainWindow" DataContext="{Binding RelativeSource={RelativeSource Self}}"
+        Title="Seadmete haldamine" Loaded="Control_OnLoaded">
+    <Grid RowDefinitions="128,*,Auto" Name="FullGrid">
+        <StackPanel Grid.ColumnSpan="2" Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="20" Margin="15">
+            <Image Source="Assets/mas_devmgr.png" Width="128" Height="128"></Image>
+            <TextBlock TextAlignment="Center" VerticalAlignment="Center" Text="Seotud seadmed" FontSize="20"></TextBlock>
+        </StackPanel>
+        <TextBlock Grid.Row="1" Name="EmptyLabel" Text="(seadmeid pole)" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
+        <DataGrid Grid.Row="1" ItemsSource="{Binding Devices}"
+                  IsReadOnly="True" Name="DeviceGrid"
+                  CanUserReorderColumns="False"
+                  CanUserResizeColumns="True"
+                  CanUserSortColumns="True"
+                  GridLinesVisibility="Horizontal"
+                  SelectionMode="Single"
+                  BorderThickness="0"
+                  Margin="10"
+                  SelectionChanged="DataGrid_OnSelectionChanged"
+                  HeadersVisibility="None" IsVisible="False"
+                  Grid.Column="0">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn>
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Spacing="10" Margin="5">
+                                <Image Source="{Binding DeviceIcon}" Width="32" RenderOptions.BitmapInterpolationMode="HighQuality"></Image>
+                                <TextBlock Text="{Binding DeviceTypeFriendly}" VerticalAlignment="Center" Margin="0, 0,25,0"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Binding="{Binding DeviceIp}"></DataGridTextColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+        <WrapPanel Grid.Row="2" Margin="10,0,10,10" ItemSpacing="10" LineSpacing="10">
+            <Button Name="AddDeviceButton" IsEnabled="True" Click="AddDeviceButton_OnClick">Lisa seade</Button>
+            <Button Name="RemoveDeviceButton" IsEnabled="False" Click="RemoveDeviceButton_OnClick">Eemalda seade</Button>
+            <Button Name="RefreshButton" IsEnabled="True" Click="RefreshButton_OnClick">Laadi uuesti</Button>
+        </WrapPanel>
+    </Grid>
+</Window>

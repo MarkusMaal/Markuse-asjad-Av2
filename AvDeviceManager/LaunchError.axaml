@@ -1,0 +1,15 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" Width="400" Height="200"
+        CanMaximize="False" CanMinimize="False"
+        CanResize="False"
+        x:Class="AvDeviceManager.LaunchError" Icon="Assets\mas_devmgr.png"
+        Title="Programmi käivitamine nurjus">
+    <StackPanel Grid.Row="1" Orientation="Vertical" VerticalAlignment="Center">
+        <TextBlock Margin="10" Name="ErrorHeader" FontSize="24" TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Bottom">Pealkiri</TextBlock>
+        <TextBlock Margin="20,0" VerticalAlignment="Top" TextWrapping="Wrap" Name="ErrorDescription" TextAlignment="Center" HorizontalAlignment="Center">Kirjeldus</TextBlock>
+        <Button HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="10" Click="Close_OnClick">Sulge</Button>
+    </StackPanel>
+</Window>
