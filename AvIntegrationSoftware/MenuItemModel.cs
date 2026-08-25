@@ -1,7 +1,11 @@
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
+using Avalonia;
+using Avalonia.Threading;
 
 namespace AvIntegrationSoftware;
 
@@ -20,11 +24,12 @@ public class MenuItemModel
     public string? StatePoller { get; set; }
 
     public string? RequiredFeatures { get; set; }
-
+    
     public void Execute()
     {
         var actionExpression = GetState()?.Action;
         if (actionExpression == null) return;
+        ((App?)Application.Current)?.ToggleBusy(true);
         var actionType = actionExpression.Split("::")[0];
         var actionRunnable = actionExpression.Split("::")[1];
         switch (actionType)
@@ -33,6 +38,7 @@ public class MenuItemModel
                 DefaultActions.ParseStr(actionRunnable);
                 break;
             case "shell":
+                if (Debugger.IsAttached) Console.WriteLine($"DEBUG: Running shell command '{actionRunnable}'");
                 var p = new Process
                 {
                     StartInfo =
@@ -50,6 +56,7 @@ public class MenuItemModel
                 p.Start();
                 break;
             case "web":
+                if (Debugger.IsAttached) Console.WriteLine($"DEBUG: Launching URL {actionRunnable}");
                 try
                 {
                     Process.Start(actionRunnable);
@@ -72,6 +79,12 @@ public class MenuItemModel
                 }
                 break;
         }
+
+        new Thread(() =>
+        {
+            Thread.Sleep(100);
+            Dispatcher.UIThread.Post(() => ((App?)Application.Current)?.ToggleBusy(false));
+        }).Start();
     }
 
     public bool HasRequiredFeatures() => (RequiredFeatures?.Split('-') ?? []).All(segment => App.Features.Contains(segment));
@@ -83,10 +96,12 @@ public class MenuItemModel
         var checkable = StatePoller.Split('(')[1].Split(')')[0];
         var yesLabel = StatePoller.Split('?')[1].Split(':')[0];
         var noLabel = StatePoller.Split(':')[1];
+        var previousState = CurrentState;
         switch (StatePoller.Split('(')[0])
         {
             case "FILE_EXISTS":
                 CurrentState = File.Exists(checkable) ? yesLabel : noLabel;
+                if (Debugger.IsAttached && (previousState != CurrentState)) Console.WriteLine($"DEBUG: State change - Polled FILE_EXISTS({checkable}), Result: {CurrentState}");
                 return;
             case "IS_TRUE":
                 CurrentState = checkable switch
@@ -96,9 +111,11 @@ public class MenuItemModel
                     "FlashDrivesAvailable" => AreThereAnyFlashDrivesMounted() ? yesLabel : noLabel, 
                     _ => CurrentState
                 };
+                if (Debugger.IsAttached && (previousState != CurrentState)) Console.WriteLine($"DEBUG: State change - Polled IS_TRUE({checkable}), Result: {CurrentState}");
                 return;
             case "PROCESS_RUNNING":
                 CurrentState = Process.GetProcessesByName(checkable).Length > 0 ? yesLabel : noLabel;
+                if (Debugger.IsAttached && (previousState != CurrentState)) Console.WriteLine($"DEBUG: State change - Polled PROCESS_RUNNING({checkable}), Result: {CurrentState}");
                 return;
         }
     }

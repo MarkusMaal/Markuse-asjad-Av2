@@ -14,7 +14,7 @@
         IsHitTestVisible="True" CanResize="False" BorderThickness="0"
         Width="400" Height="245" WindowStartupLocation="CenterScreen"
         BorderBrush="Transparent" WindowState="Normal" ShowInTaskbar="False"
-        Foreground="White" Loaded="Control_OnLoaded"
+        Foreground="White"
         Icon="Assets/mas_integration.png" DataContext="{Binding RelativeSource={RelativeSource Self}}">
     <Grid RowDefinitions="*,Auto,30">
         <Rectangle Grid.Row="0" Grid.RowSpan="3" Name="Backglass" Fill="#8009" Width="400" Height="245">
@@ -32,7 +32,7 @@
         <TextBlock Grid.Row="1" FontFamily="Segoe UI,Ubuntu,sans-serif"
                FontSize="28" HorizontalAlignment="Center" VerticalAlignment="Center"
                Margin="0,10" FontWeight="SemiLight" TextAlignment="Center"
-               Name="DeviceLabel" TextWrapping="Wrap" Text=""></TextBlock>
+               Name="DeviceLabel" TextWrapping="Wrap" Text="integratsiooniprogramm"></TextBlock>
         <Label Grid.Row="2" HorizontalAlignment="Center" FontSize="10" Content="{Binding Copyright}"></Label>
         <ProgressBar Grid.Row="2" IsIndeterminate="True" Value="1" Maximum="100" VerticalAlignment="Bottom"></ProgressBar>
         

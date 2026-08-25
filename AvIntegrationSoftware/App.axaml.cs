@@ -13,6 +13,7 @@ using Avalonia.Media.Imaging;
 using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.Controls.Primitives;
+using Avalonia.Platform;
 using MasCommon;
 
 namespace AvIntegrationSoftware;
@@ -35,6 +36,7 @@ public class App : Application
     private DateTime _nextCheck;
     // ReSharper disable once UnusedMember.Local
     private Watchers _watchers = new(); // this line must NOT be removed, otherwise M.A.I.A. integration will not work
+    private bool previousBusy = true;
     
     public override void Initialize()
     {
@@ -227,7 +229,10 @@ public class App : Application
                     var submenuRealIconPath = subItem.GetState()!.IconPath.Replace("%MAS_ROOT%", MasRoot);
                     subMenu.Items.Add(new NativeMenuItem(subItem.GetState()!.Label)
                     {
-                        Command = new MenuCommand(() => subItem.Execute()),
+                        Command = new MenuCommand(() =>
+                        {
+                            subItem.Execute();
+                        }),
                         Icon = new Bitmap(submenuRealIconPath),
                         IsVisible = Debugger.IsAttached || !subItem.MenuIdentifier!.Contains("Debug"),
                         IsEnabled = subItem.HasRequiredFeatures() && subItem.GetState()!.StateIdentifier != "Gray"
@@ -249,6 +254,21 @@ public class App : Application
         }
     }
 
+    public void ToggleBusy(bool isBusy)
+    {
+        if (previousBusy == isBusy) return;
+        var hourGlassStream = AssetLoader.Open(new Uri("avares://AvIntegrationSoftware/Assets/hourglass.png"));
+        var logoStream = AssetLoader.Open(new Uri("avares://AvIntegrationSoftware/Assets/mas_integration.png"));
+        var hourGlass = new Bitmap(hourGlassStream);
+        var logo = new Bitmap(logoStream);
+        TrayIcon.GetIcons(this)?.First().Icon = new WindowIcon(isBusy ? hourGlass : logo);
+        hourGlass.Dispose();
+        logo.Dispose();
+        hourGlassStream.Close();
+        logoStream.Close();
+        previousBusy = isBusy;
+    }
+
     private void MenuUpdateThread()
     {
         while (!_shutdownNow)
@@ -262,6 +282,7 @@ public class App : Application
 
             if (DateTime.Now > _nextCheck)
             {
+                Dispatcher.UIThread.Post(() => ToggleBusy(true));
                 _nextCheck = DateTime.Now.Add(_checkInterval);
                 TryRefreshFeatures();
                 if (!Verifile.CheckVerifileTamper() || !Verifile.CheckFiles(Verifile.FileScope.IntegrationSoftware) || !_vf.IsVerified() || !Features.Contains("IP"))
@@ -305,6 +326,8 @@ public class App : Application
                         Environment.Exit(0);
                     }).Start();
                 }
+
+                ToggleBusy(false);
                 foreach (var (i, mi) in (_menu.MenuItems ?? []).Index())
                 {
                     if (mi.GetState() == null) continue;
@@ -315,7 +338,7 @@ public class App : Application
                     // some operating systems may not neccessarily have the menu items in the same order
                     // we added them in, so we have to find the corresponding menu item by name instead
                     // of the index to make sure states are updated correctly
-                    var nativeMenu = (NativeMenuItem)_trayIcon.Menu!.Items.First(p => ((NativeMenuItem)p).Header == mi.GetState()?.Label);
+                    var nativeMenu = (NativeMenuItem?)_trayIcon.Menu!.Items.First(p => ((NativeMenuItem)p).Header == previousState?.Label);
                     if (nativeMenu == null && mi.SubItems?.Length > 0)
                     {
                         throw new NullReferenceException();
@@ -346,10 +369,12 @@ public class App : Application
             });
             Thread.Sleep(_pollRate);
         }
+        if (Debugger.IsAttached) Console.WriteLine("DEBUG: Shutting down");
     }
 
     public static void Exit()
     {
+        ((App?)Current)?.ToggleBusy(true);
         ((IClassicDesktopStyleApplicationLifetime)((App)Current!).ApplicationLifetime!)
             .TryShutdown(); // will have a delay, up to {PollRate} ms
     }

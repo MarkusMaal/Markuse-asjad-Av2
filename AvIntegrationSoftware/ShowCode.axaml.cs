@@ -70,7 +70,6 @@ public partial class ShowCode : Window
         {
             File.Delete(string.Format(App.MasRoot + "/maia/{0}.{1}.maia", _devType, _devIp?.Replace(".", "_")));
             File.Delete(App.MasRoot + "/maia/close_popup.maia");
-            _waitForClose.Stop();
             Program.CodeOpen = false;
             this.Close();
         }
@@ -80,7 +79,6 @@ public partial class ShowCode : Window
             TimerLabel.Content = _timeLeft.ToString();
             if (_timeLeft != 0) return;
             File.Delete(string.Format(App.MasRoot + "/maia/{0}.{1}.maia", _devType, _devIp?.Replace(".", "_")));
-            _waitForClose.Stop();
             Program.CodeOpen = false;
             this.Close();
         }

@@ -15,7 +15,7 @@
         </StackPanel>
         <StackPanel HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="25" >
             <Image Source="/Assets/mas_integration.png" Width="100" Height="100" RenderOptions.BitmapInterpolationMode="HighQuality" HorizontalAlignment="Left"></Image>
-            <Label FontFamily="Calibri,Segoe UI,Ubuntu,sans-serif" FontWeight="Light" FontSize="21" Margin="0,15,0,0">markuse arvuti integratsioonitarkvara</Label>
+            <Label FontFamily="Calibri,Segoe UI,Ubuntu,sans-serif" FontWeight="Light" FontSize="21" Margin="0,15,0,0">integratsiooniprogramm</Label>
         </StackPanel>
         <StackPanel HorizontalAlignment="Right" VerticalAlignment="Bottom" Orientation="Horizontal" Margin="20">
             <Label VerticalAlignment="Center" Margin="15,0">Aega jäänud</Label>
