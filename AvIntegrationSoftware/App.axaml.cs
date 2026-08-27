@@ -414,8 +414,6 @@ public class App : Application
                     {
                         _splashScreen.Background = new SolidColorBrush(Color.FromArgb(64, byte.Parse(bgs[0]), byte.Parse(bgs[1]), byte.Parse(bgs[2])));
                         _splashScreen.Foreground = new SolidColorBrush(cols[1]);
-                        if (!OperatingSystem.IsWindows()) return;
-                        Styles.Clear();
                         Styles.Add(new Style(x => x.OfType<MenuItem>())
                         {
                             Setters = {
