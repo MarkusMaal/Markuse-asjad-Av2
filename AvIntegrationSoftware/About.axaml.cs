@@ -52,6 +52,13 @@ public partial class About : Window
         var editionDetails = new StringBuilder();
         editionDetails.AppendLine("Versioon: " + masVer[2]);
         editionDetails.AppendLine("Järk: " + masVer[3]);
+        MasName.Content = masVer[3][^1] switch
+        {
+            'a' => "Markuse arvuti asjad",
+            'b' => "Markuse virtuaalarvuti asjad",
+            'c' => "Markuse tahvelarvuti asjad",
+            _ => MasName.Content
+        };
         editionDetails.AppendLine("Nimi: " + masVer[10]);
         editionDetails.AppendLine("Keel: " + masVer[6]);
         editionDetails.AppendLine("Juurutatud?: " + (masVer[4] == "Yes" ? "Jah" : "Ei"));
