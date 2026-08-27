@@ -444,6 +444,11 @@ public class App : Application
 
     public static void ShowAbout()
     {
+        if (About.AlreadyOpen)
+        {
+            Program.Log("About window is already open, ignoring the request to open another one");
+            return;
+        }
         new About
         {
             Background = new SolidColorBrush(Scheme[0]),

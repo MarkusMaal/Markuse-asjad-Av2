@@ -4,7 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" Width="800" Height="500" CanMaximize="False" CanResize="False"
         x:Class="AvIntegrationSoftware.About" Icon="Assets/mas_integration.png"
-        Title="Teave Markuse asjade kohta" Loaded="About_OnLoaded" ShowInTaskbar="False">
+        Title="Teave Markuse asjade kohta" Loaded="About_OnLoaded" ShowInTaskbar="False" Closing="Window_Closing">
     <Grid Name="AboutGrid">
       <Panel Margin="10">
         <StackPanel>

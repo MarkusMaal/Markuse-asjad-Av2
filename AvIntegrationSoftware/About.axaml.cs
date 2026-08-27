@@ -19,8 +19,10 @@ namespace AvIntegrationSoftware;
 public partial class About : Window
 {
     private readonly Verifile _vf = new();
+    public static bool AlreadyOpen = false;
     public About()
     {
+        AlreadyOpen = true;
         InitializeComponent();
     }
 
@@ -161,5 +163,10 @@ public partial class About : Window
         {
             _ = animation.RunAsync(c);
         }
+    }
+
+    private void Window_Closing(object? sender, WindowClosingEventArgs e)
+    {
+        AlreadyOpen = false;
     }
 }
