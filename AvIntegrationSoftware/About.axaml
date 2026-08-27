@@ -42,7 +42,7 @@
                   </ToolTip.Tip>
                 </Panel>
                 <StackPanel Margin="0">
-                  <Label Name="MasName" Margin="15,-5" FontSize="25" FontWeight="SemiLight" VerticalAlignment="Top" ToolTip.Tip="Kuvab mis liiki Markuse asjaga on tegemist.">Markuse asjad</Label>
+                  <Label Name="MasName" Margin="15,-5" FontSize="25" FontWeight="SemiLight" VerticalAlignment="Top" ToolTip.Tip="Kuvab mis liiki Markuse asjaga on tegemist.">Markuse  asjad</Label>
                   <Label Name="MasEditionLabel" Margin="15,3" FontSize="18" FontWeight="SemiLight" VerticalAlignment="Top" ToolTip.Tip="Väljaanne tekstina.">Tundmatu väljaanne</Label>
                 </StackPanel>
               </StackPanel>
@@ -51,7 +51,7 @@
               </TextBlock>
           </StackPanel>
           <StackPanel HorizontalAlignment="Right" Margin="-10,20">
-            <Label Margin="-5,5">Funktsioonid</Label>
+            <Label Margin="-5,50, 0, 0">Funktsioonid</Label>
             <WrapPanel Width="400">
               <StackPanel Classes="NM" Orientation="Horizontal" VerticalAlignment="Center">
                 <Image Name="FeatTs" MaxHeight="32" MaxWidth="32" ></Image>
