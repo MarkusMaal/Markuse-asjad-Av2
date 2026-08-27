@@ -14,6 +14,26 @@ internal abstract class Program
         get => App.Features.Contains("RD") && field;
         set;
     } = true;
+    
+    private static readonly bool VerboseLogging = Debugger.IsAttached || File.Exists(Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".MAS_LOG_VERBOSE"));
+
+    public static bool FlashAutorun
+    {
+        get
+        {
+            try
+            {
+                var settings2File = File.OpenText(Path.Join(App.MasRoot, "settings2.sf"));
+                var line = settings2File.ReadLine();
+                settings2File.Close();
+                return line == "AutoRun=true";
+            }
+            catch
+            {
+                return field;
+            }
+        }
+    } = false;
 
     // Initialization code. Don't use any Avalonia, third-party APIs or any
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
@@ -23,9 +43,16 @@ internal abstract class Program
     {
         try
         {
+            Log("Log start");
+            if (Debugger.IsAttached) Log("Debugger is attached, additional logging will be provided");
             BuildAvaloniaApp()
                 .StartWithClassicDesktopLifetime(args);
-        } catch (Exception ex) when (!Debugger.IsAttached)
+        }
+        catch (OperationCanceledException)
+        {
+            // nobody cares
+        } 
+        catch (Exception ex) when (!Debugger.IsAttached)
         {
             var exePath = Environment.ProcessPath;
             if (!OperatingSystem.IsLinux())
@@ -47,4 +74,20 @@ internal abstract class Program
 #endif
             .WithInterFont()
             .LogToTrace();
+
+    public static void Log(string message)
+    {
+        if (!VerboseLogging) return;
+        var logFile = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            ".MAS_LOG_VERBOSE");
+        Console.ForegroundColor = ConsoleColor.DarkGray;
+        var dateStr = $"[{DateTime.Now.ToShortDateString()} {DateTime.Now.ToLongTimeString()}]";
+        Console.Write($"\r{dateStr} ");
+        Console.ResetColor();
+        Console.WriteLine(message);
+        if (File.Exists(logFile))
+        {
+            File.AppendAllText(logFile, $"{dateStr} {message}\n");
+        }
+    }
 }

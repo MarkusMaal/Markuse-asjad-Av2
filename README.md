@@ -18,9 +18,14 @@ Uued Markuse arvuti asjade programmid, mis vastavad Markuse asjad Av2 standardit
 * Uus konfiguratsioonifaili süsteem menüü üksuste valimiseks
 * Ilma akendeta käivitumine
 * Mälupulga juhtpaneeli kopeerimine ja käivitamine
+* Mälupulga juhtpaneeli automaatne käivitamine seadme sisestamisel
 * Tahvelarvuti/nutitelefoni sidumine kinnituskoodiga
 * Töölauamärkmete kuvamine/peitmine
-* Perioodilised Markuse asjade püsivuskontrollid
+* Perioodilised Markuse asjade püsivuskontrollid (Verifile)
+* Seadete automaatne uuesti laadimine nende muutmisel (nt Markuse arvuti juhtpaneeli kaudu)
+* Teabeaken (käivitatav menüüst või faili <MAS_ROOT>/showabout.txt loomisel)
+* Ajastatud toimingute tugi - skripti käivitamine kindlal kuupäeval ja kellaajal
+* Põhjalik logimine
 * Uus ikoon :)
 
 ### Konfigureerimine
@@ -85,6 +90,8 @@ Teatud attribuutide jaoks on võimalik kasutada ka %MAS_ROOT% muutujat, mis viit
 Kui silute programmi, kuvatakse menüüelemendid, mille ID-s on sõne "Debug".
 
 Kui soovite testida erinevate akende funktsionaalsust, käivitage programm parameetriga `--interface-test`.
+
+Võimalik on sisse lülitada ka põhjalik logimine. Selleks lisage kasutaja kodukausta fail `.MAS_VERBOSE_LOG`. Sellesse faili lähebki põhjaliku logi sisu.
 
 ### Veaotsing
 

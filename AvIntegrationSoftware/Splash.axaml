@@ -10,7 +10,7 @@
         ExtendClientAreaTitleBarHeightHint="-1"
         WindowDecorations="BorderOnly"
         TransparencyLevelHint="Transparent"
-        Background="Transparent"
+        Background="Transparent" Closing="Splash_OnClosing"
         IsHitTestVisible="True" CanResize="False" BorderThickness="0"
         Width="400" Height="245" WindowStartupLocation="CenterScreen"
         BorderBrush="Transparent" WindowState="Normal" ShowInTaskbar="False"

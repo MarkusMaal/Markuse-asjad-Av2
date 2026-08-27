@@ -7,7 +7,7 @@ namespace AvDeviceManager;
 
 public partial class AddDevice : Window
 {
-    public bool Result = false;
+    public bool Result;
     public AddDevice()
     {
         InitializeComponent();

@@ -10,7 +10,7 @@ public abstract class DefaultActions
 {
     public static void ParseStr(string str)
     {
-        if (Debugger.IsAttached) Console.WriteLine($"DEBUG: Execute default action {str}");
+        Program.Log($"Execute default action {str}");
         switch (str)
         {
             case "ToggleDesktopNotes":
@@ -59,6 +59,8 @@ public abstract class DefaultActions
                         p.StartInfo.FileName = "open";
                         p.StartInfo.Arguments = $"-a \"{fullPath}\"";
                     }
+                    
+                    Program.Log($"Attempting to start process \"{p.StartInfo.FileName}\" with args \"{p.StartInfo.Arguments}\"");
 
                     if (File.Exists(fullPath) || Directory.Exists(fullPath))
                     {
@@ -67,6 +69,9 @@ public abstract class DefaultActions
                     break;
                 }
                 break;
+            case "ShowAbout":
+                App.ShowAbout();
+                break;
             default:
                 throw new NotImplementedException();
         }
@@ -74,7 +79,7 @@ public abstract class DefaultActions
 
     private static void OpenHomeDir()
     {
-        if (Debugger.IsAttached) Console.WriteLine($"DEBUG: Opening home directory");
+        Program.Log($"Opening home directory");
         var p = new Process();
         p.StartInfo.FileName = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         p.StartInfo.UseShellExecute = true;
@@ -86,12 +91,12 @@ public abstract class DefaultActions
         var suff = OperatingSystem.IsWindows() ? ".exe" : "";
         if (File.Exists(Path.Join(App.MasRoot, "noteopen.txt")))
         {
-            if (Debugger.IsAttached) Console.WriteLine($"DEBUG: Closing desktop notes");
+            Program.Log($"Closing desktop notes");
             File.Delete(Path.Join(App.MasRoot, "noteopen.txt"));
             File.WriteAllText(Path.Join(App.MasRoot, "closenote.log"), "See fail saadab töölauamärkmete rakendusele käskluse sulgeda. Kui te näete seda teksti, palun kustutage see fail.");
             return;
         }
-        if (Debugger.IsAttached) Console.WriteLine($"DEBUG: Opening desktop notes");
+        Program.Log($"Opening desktop notes");
         File.WriteAllText(Path.Join(App.MasRoot, "noteopen.txt"), "See fail sisaldab informatsiooni töölauamärkmetega töötamiseks.");
         Process.Start(Path.Join(App.MasRoot, "Markuse asjad", "TöölauaMärkmed" + suff));
     }

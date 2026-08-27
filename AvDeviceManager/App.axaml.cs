@@ -11,7 +11,7 @@ namespace AvDeviceManager;
 public class App : Application
 {
     public static readonly string MasRoot = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".mas");
-    private static Verifile vf = new();
+    private static readonly Verifile Vf = new();
     
     public override void Initialize()
     {
@@ -34,7 +34,7 @@ public class App : Application
         if (gootToGo)
         {
             if (Debugger.IsAttached) Console.WriteLine("Verifile räsi OK");
-            var result = vf.MakeAttestation();
+            var result = Vf.MakeAttestation();
             if (result != "VERIFIED")
             {
                 errorHeader = "Verifile kontroll nurjus";

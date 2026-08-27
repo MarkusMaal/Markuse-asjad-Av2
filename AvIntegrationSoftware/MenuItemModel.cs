@@ -1,4 +1,3 @@
-using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -24,6 +23,7 @@ public class MenuItemModel
     public string? StatePoller { get; set; }
 
     public string? RequiredFeatures { get; set; }
+    private static bool _alreadyLaunched = true; // set to true to avoid flash auto-launch when program first starts 
     
     public void Execute()
     {
@@ -38,7 +38,7 @@ public class MenuItemModel
                 DefaultActions.ParseStr(actionRunnable);
                 break;
             case "shell":
-                if (Debugger.IsAttached) Console.WriteLine($"DEBUG: Running shell command '{actionRunnable}'");
+                Program.Log($"Running shell command '{actionRunnable}'");
                 var p = new Process
                 {
                     StartInfo =
@@ -56,7 +56,7 @@ public class MenuItemModel
                 p.Start();
                 break;
             case "web":
-                if (Debugger.IsAttached) Console.WriteLine($"DEBUG: Launching URL {actionRunnable}");
+                Program.Log($"Launching URL {actionRunnable}");
                 try
                 {
                     Process.Start(actionRunnable);
@@ -101,28 +101,43 @@ public class MenuItemModel
         {
             case "FILE_EXISTS":
                 CurrentState = File.Exists(checkable) ? yesLabel : noLabel;
-                if (Debugger.IsAttached && (previousState != CurrentState)) Console.WriteLine($"DEBUG: State change - Polled FILE_EXISTS({checkable}), Result: {CurrentState}");
+                if ((previousState != CurrentState)) Program.Log($"State change - Polled FILE_EXISTS({checkable}), Result: {CurrentState}");
                 return;
             case "IS_TRUE":
                 CurrentState = checkable switch
                 {
                     "AllowCode" => Program.AllowCode ? yesLabel : noLabel,
                     "CodeOpen" => Program.CodeOpen ? yesLabel : noLabel,
-                    "FlashDrivesAvailable" => AreThereAnyFlashDrivesMounted() ? yesLabel : noLabel, 
+                    "FlashDrivesAvailable" => AreThereAnyFlashDrivesMounted() ? yesLabel : noLabel,
+                    "FlashAutorun" => Program.FlashAutorun ? yesLabel : noLabel, 
                     _ => CurrentState
                 };
-                if (Debugger.IsAttached && (previousState != CurrentState)) Console.WriteLine($"DEBUG: State change - Polled IS_TRUE({checkable}), Result: {CurrentState}");
+                if ((previousState != CurrentState)) Program.Log($"State change - Polled IS_TRUE({checkable}), Result: {CurrentState}");
                 return;
             case "PROCESS_RUNNING":
                 CurrentState = Process.GetProcessesByName(checkable).Length > 0 ? yesLabel : noLabel;
-                if (Debugger.IsAttached && (previousState != CurrentState)) Console.WriteLine($"DEBUG: State change - Polled PROCESS_RUNNING({checkable}), Result: {CurrentState}");
+                if ((previousState != CurrentState)) Program.Log($"State change - Polled PROCESS_RUNNING({checkable}), Result: {CurrentState}");
                 return;
         }
     }
 
     private static bool AreThereAnyFlashDrivesMounted()
     {
-        return DriveInfo.GetDrives().Any(di => File.Exists(Path.Join(di.RootDirectory.FullName, "E_INFO", "edition.txt")) && File.Exists(Path.Join(di.RootDirectory.FullName, "NTFS", "config.sys")));
+        var result = DriveInfo.GetDrives().Any(di => File.Exists(Path.Join(di.RootDirectory.FullName, "E_INFO", "edition.txt")) && File.Exists(Path.Join(di.RootDirectory.FullName, "NTFS", "config.sys")));
+        if (!Program.FlashAutorun) return result;
+        switch (result)
+        {
+            case true when !_alreadyLaunched:
+                Program.Log("Stopped searching for flash drives");
+                DefaultActions.ParseStr("FlashAutorun");
+                _alreadyLaunched = true;
+                break;
+            case false when _alreadyLaunched:
+                Program.Log("Started searching for flash drives");
+                _alreadyLaunched = false;
+                break;
+        }
+        return result;
     }
 
     public void SetState(string newState)

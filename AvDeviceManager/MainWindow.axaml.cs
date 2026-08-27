@@ -49,8 +49,8 @@ public partial class MainWindow : Window
 
     private static void StopWatch()
     {
-        Program.TotalStartupStopwatch.Stop();
-        if (Debugger.IsAttached) Console.WriteLine($"Terve programmi laadimiseks kulus {Program.TotalStartupStopwatch.ElapsedMilliseconds}ms");
+        Program.TotalStartupStopwatch?.Stop();
+        if (Debugger.IsAttached) Console.WriteLine($"Terve programmi laadimiseks kulus {Program.TotalStartupStopwatch?.ElapsedMilliseconds}ms");
     }
 
     private static Color SplitToColor(string[] split) => new(255, byte.Parse(split[0]), byte.Parse(split[1]), byte.Parse(split[2]));

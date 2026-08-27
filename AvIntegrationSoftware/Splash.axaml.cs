@@ -10,4 +10,9 @@ public partial class Splash : Window
     {
         InitializeComponent();
     }
+
+    private void Splash_OnClosing(object? sender, WindowClosingEventArgs e)
+    {
+        Program.Log("Closing splash screen");
+    }
 }

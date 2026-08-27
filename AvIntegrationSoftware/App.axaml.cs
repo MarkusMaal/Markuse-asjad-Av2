@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using Avalonia;
 using Avalonia.Controls;
@@ -34,72 +35,27 @@ public class App : Application
     public static string Features = "";
     private readonly TimeSpan _checkInterval = new(1, 0, 0);
     private DateTime _nextCheck;
-    // ReSharper disable once UnusedMember.Local
-    private Watchers _watchers = new(); // this line must NOT be removed, otherwise M.A.I.A. integration will not work
-    private bool previousBusy = true;
+    private static Watchers? _watchers; // this line must NOT be removed, otherwise M.A.I.A. integration will not work
+    private bool _previousBusy = true;
+    private TaskScheduler? _taskScheduler;
     
     public override void Initialize()
     {
         _nextCheck = DateTime.Now.Add(_checkInterval);
         TryRefreshFeatures();
-        
-        if (File.Exists(Path.Join(MasRoot, "Config.json")))
-        {
-            MasConfig.Load(MasRoot);
-        }
-        else if (Directory.Exists(MasRoot))
-        {
-            // default settings
-            MasConfig.PollRate = 5000;
-            MasConfig.AutostartNotes = false;
-            MasConfig.ShowLogo = true;
-            MasConfig.AllowScheduledTasks = true;
-            MasConfig.Save(MasRoot);
-        }
-
-        _pollRate = MasConfig.PollRate;
+        _watchers = new Watchers();
+        UpdateConfig();
         if (MasConfig.ShowLogo) _splashScreen.Show();
         if (MasConfig.AutostartNotes)
         {
-            if (!File.Exists(Path.Join(App.MasRoot, "noteopen.txt")))
+            if (!File.Exists(Path.Join(MasRoot, "noteopen.txt")))
             {
                 DefaultActions.ParseStr("ToggleDesktopNotes");   
             }
         }
         if (File.Exists(Path.Join(MasRoot, "scheme.cfg")))
         {
-            new Thread(() =>
-            {
-                
-                while (true)
-                {
-                    try
-                    {
-                        var bgfg = File.ReadAllText(Path.Join(MasRoot, "scheme.cfg")).Split(';');
-                        var bgs = bgfg[0].Split(':');
-                        var fgs = bgfg[1].Split(':');
-                        Color[] cols = [Color.FromArgb(255, byte.Parse(bgs[0]), byte.Parse(bgs[1]), byte.Parse(bgs[2])), Color.FromArgb(255, byte.Parse(fgs[0]), byte.Parse(fgs[1]), byte.Parse(fgs[2]))];
-                        Scheme = cols;
-                        Dispatcher.UIThread.Post(() =>
-                        {
-                            _splashScreen.Background = new SolidColorBrush(Color.FromArgb(64, byte.Parse(bgs[0]), byte.Parse(bgs[1]), byte.Parse(bgs[2])));
-                            _splashScreen.Foreground = new SolidColorBrush(cols[1]);
-                            if (OperatingSystem.IsWindows())
-                            {
-                                Styles.Add(new Style(x => x.OfType<MenuItem>())
-                                {
-                                    Setters = {
-                                        new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(Scheme[0])),
-                                        new Setter(TemplatedControl.ForegroundProperty, new SolidColorBrush(Scheme[1]))
-                                    }
-                                });
-                            }
-                        });
-                        return;
-                    }
-                    catch { Thread.Sleep(100); }
-                }
-            }).Start();
+            UpdateScheme();
         }
         AvaloniaXamlLoader.Load(this);
     }
@@ -113,10 +69,11 @@ public class App : Application
             for (var i = 0; i < 8; i++) es.ReadLine();
             Features = es.ReadLine() ?? Features;
             es.Close();
+            Program.Log($"Available features {Features}");
         }
         catch
         {
-            // failed to read means no features available
+            Program.Log("Failed to query available features, assuming none");
         }
     }
 
@@ -211,9 +168,18 @@ public class App : Application
         }).Start();
     }
 
-    private void InitTrayMenu()
+    private void InitTrayMenu(bool reInit = false)
     {
+        Watchers.WeGoodForNow = false;
         _trayIcon = TrayIcon.GetIcons(this)!.First();
+        if (!reInit)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            if (Program.FlashAutorun)
+                Console.Error.WriteLine(
+                    "WARNING: Autorun from flash drives is enabled. This may pose a security risk when inserting unknown USB devices!");
+            Console.ResetColor();
+        }
         foreach (var mi in _menu.MenuItems ?? [])
         {
             mi.PollState();
@@ -256,7 +222,7 @@ public class App : Application
 
     public void ToggleBusy(bool isBusy)
     {
-        if (previousBusy == isBusy) return;
+        if (_previousBusy == isBusy) return;
         var hourGlassStream = AssetLoader.Open(new Uri("avares://AvIntegrationSoftware/Assets/hourglass.png"));
         var logoStream = AssetLoader.Open(new Uri("avares://AvIntegrationSoftware/Assets/mas_integration.png"));
         var hourGlass = new Bitmap(hourGlassStream);
@@ -266,11 +232,12 @@ public class App : Application
         logo.Dispose();
         hourGlassStream.Close();
         logoStream.Close();
-        previousBusy = isBusy;
+        _previousBusy = isBusy;
     }
 
     private void MenuUpdateThread()
     {
+        Program.Log($"Initialized menu polling with {_pollRate}ms interval");
         while (!_shutdownNow)
         {
             if (_featureTripped) return;
@@ -280,6 +247,19 @@ public class App : Application
                 continue;
             }
 
+            if (_taskScheduler != null && !Design.IsDesignMode)
+            {
+                var delta = TimeSpan.FromMilliseconds(_pollRate);
+                foreach (var task in _taskScheduler.Tasks ?? [])
+                {
+                    if (task.HasRun) continue;
+                    if (DateTime.Now > task.TriggerTime - delta && DateTime.Now < task.TriggerTime + delta)
+                    {
+                        task.RunTask();
+                    }
+                }
+            }
+
             if (DateTime.Now > _nextCheck)
             {
                 Dispatcher.UIThread.Post(() => ToggleBusy(true));
@@ -287,10 +267,10 @@ public class App : Application
                 TryRefreshFeatures();
                 if (!Verifile.CheckVerifileTamper() || !Verifile.CheckFiles(Verifile.FileScope.IntegrationSoftware) || !_vf.IsVerified() || !Features.Contains("IP"))
                 {
-                    Console.WriteLine("Integrity checks failed: This may be due to a recent hardware or software change!");
+                    Program.Log("Integrity checks failed: This may be due to a recent hardware or software change!");
                     Environment.Exit(255);
                 }
-                if (Debugger.IsAttached) Console.WriteLine($"Integrity checks passed: Next check at {_nextCheck.ToShortTimeString()}");
+                Program.Log($"Integrity checks passed: Next check at {_nextCheck.ToShortTimeString()}");
             }
 
             if (!Directory.Exists(Path.Join(MasRoot, "integration_data"))) return;
@@ -343,9 +323,8 @@ public class App : Application
                     {
                         throw new NullReferenceException();
                     }
-                    foreach (var (j, smi) in (nativeMenu?.Menu ?? []).Index())
+                    foreach (var (_, smi) in (nativeMenu?.Menu ?? []).Index())
                     {
-                        if (mi.SubItems == null) continue;
                         var subItemLinq = mi.SubItems?.First(p => p.GetState()?.Label == ((NativeMenuItem)smi).Header);
                         if (subItemLinq?.GetState() == null) continue;
                         var submenuPreviousState = subItemLinq.GetState();
@@ -369,11 +348,121 @@ public class App : Application
             });
             Thread.Sleep(_pollRate);
         }
-        if (Debugger.IsAttached) Console.WriteLine("DEBUG: Shutting down");
+        Program.Log("Shutting down application");
+    }
+
+    public void ReInit()
+    {
+        _menu.Load();
+        TrayIcon.GetIcons(this)?.First().Menu?.Items.Clear();
+        InitTrayMenu(true);
+    }
+
+    public void UpdateConfig()
+    {
+        try
+        {
+            if (File.Exists(Path.Join(MasRoot, "Config.json")))
+            {
+                MasConfig.Load(MasRoot);
+            }
+            else if (Directory.Exists(MasRoot))
+            {
+                // default settings
+                MasConfig.PollRate = 5000;
+                MasConfig.AutostartNotes = false;
+                MasConfig.ShowLogo = true;
+                MasConfig.AllowScheduledTasks = true;
+                MasConfig.Save(MasRoot);
+            }
+        }
+        catch (JsonException) // the file is updated too quickly, keep the current config for now
+        {
+            return;
+        }
+
+        _pollRate = MasConfig.PollRate;
+        _taskScheduler = MasConfig.AllowScheduledTasks ? new TaskScheduler() : null;
+
+        if (Debugger.IsAttached)
+        {
+            Program.Log($"Current configuration: PollRate={_pollRate}, AutoStartNotes={MasConfig.AutostartNotes}, ShowLogo={MasConfig.ShowLogo}, AllowScheduledTasks={MasConfig.AllowScheduledTasks}");
+        }
+
+        Watchers.WeGoodForNow = false;
+        if (_pollRate >= 1500) return;
+        Console.ForegroundColor = ConsoleColor.Red;
+        Console.Error.WriteLine("WARNING: Very fast poll rates may result in high CPU utilization!");
+        Console.ResetColor();
+    }
+
+    public void UpdateScheme()
+    {
+        new Thread(() =>
+        {
+                
+            while (true)
+            {
+                try
+                {
+                    var bgfg = File.ReadAllText(Path.Join(MasRoot, "scheme.cfg")).Split(';');
+                    var bgs = bgfg[0].Split(':');
+                    var fgs = bgfg[1].Split(':');
+                    Color[] cols = [Color.FromArgb(255, byte.Parse(bgs[0]), byte.Parse(bgs[1]), byte.Parse(bgs[2])), Color.FromArgb(255, byte.Parse(fgs[0]), byte.Parse(fgs[1]), byte.Parse(fgs[2]))];
+                    Scheme = cols;
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        _splashScreen.Background = new SolidColorBrush(Color.FromArgb(64, byte.Parse(bgs[0]), byte.Parse(bgs[1]), byte.Parse(bgs[2])));
+                        _splashScreen.Foreground = new SolidColorBrush(cols[1]);
+                        if (!OperatingSystem.IsWindows()) return;
+                        Styles.Clear();
+                        Styles.Add(new Style(x => x.OfType<MenuItem>())
+                        {
+                            Setters = {
+                                new Setter(TemplatedControl.BackgroundProperty, new SolidColorBrush(Scheme[0])),
+                                new Setter(TemplatedControl.ForegroundProperty, new SolidColorBrush(Scheme[1]))
+                            }
+                        });
+                    });
+                    Program.Log($"Current color scheme: {cols[0]}/{cols[1]}");
+                    Watchers.WeGoodForNow = false;
+                    return;
+                }
+                catch { Thread.Sleep(100); }
+            }
+        }).Start();
+    }
+
+    public void UpdateScheduledTasks()
+    {
+        if (!MasConfig.AllowScheduledTasks)
+        {
+            Program.Log("Scheduled tasks are disabled, ignoring");
+            return;
+        }
+        _taskScheduler?.ReloadTasks();
+        Watchers.WeGoodForNow = false;
+    }
+
+    public static void ShowAbout()
+    {
+        new About
+        {
+            Background = new SolidColorBrush(Scheme[0]),
+            Foreground = new SolidColorBrush(Scheme[1]),
+            AboutGrid =
+            {
+                Background = new ImageBrush(new Bitmap(Path.Join(MasRoot, "bg_common.png")))
+                {
+                    Stretch = Stretch.UniformToFill
+                }
+            }
+        }.Show();
     }
 
     public static void Exit()
     {
+        _watchers?.CloseWatchers();
         ((App?)Current)?.ToggleBusy(true);
         ((IClassicDesktopStyleApplicationLifetime)((App)Current!).ApplicationLifetime!)
             .TryShutdown(); // will have a delay, up to {PollRate} ms

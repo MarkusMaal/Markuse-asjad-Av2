@@ -15,6 +15,7 @@ public class MenuModel
             MasMenuModelGenerationContext.Default.MenuModel);
         if (cnf == null) return;
         MenuItems = cnf.MenuItems;
+        Program.Log($"Initialized menu model with {MenuItems?.Length} entries");
     }
 }
 
