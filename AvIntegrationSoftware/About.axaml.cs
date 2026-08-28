@@ -19,7 +19,7 @@ namespace AvIntegrationSoftware;
 public partial class About : Window
 {
     private readonly Verifile _vf = new();
-    public static bool AlreadyOpen = false;
+    public static bool AlreadyOpen;
     public About()
     {
         AlreadyOpen = true;

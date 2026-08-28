@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using Avalonia.Media;
+using Avalonia.Media.Imaging;
 
 // ReSharper disable UnusedMember.Global
 
@@ -24,6 +26,20 @@ public abstract class DefaultActions
                 break;
             case "ToggleAllowCode":
                 Program.AllowCode = !Program.AllowCode;
+                break;
+            case "MenuEditor":
+                new MenuEditor()
+                {
+                    Background = new SolidColorBrush(App.Scheme[0]),
+                    Foreground = new SolidColorBrush(App.Scheme[1]),
+                    RootPanel =
+                    {
+                        Background = new ImageBrush(new Bitmap(Path.Join(App.MasRoot, "bg_common.png")))
+                        {
+                            Stretch = Stretch.UniformToFill,
+                        },
+                    }
+                }.Show();
                 break;
             case "FlashAutorun":
                 foreach (var di in DriveInfo.GetDrives())

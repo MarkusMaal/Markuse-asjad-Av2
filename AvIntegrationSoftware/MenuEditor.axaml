@@ -1,0 +1,63 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:avIntegrationSoftware="clr-namespace:AvIntegrationSoftware"
+        mc:Ignorable="d" Width="800" Height="450"
+        x:Class="AvIntegrationSoftware.MenuEditor" DataContext="{Binding RelativeSource={RelativeSource Self}}"
+        Title="Menüüredaktor" Icon="Assets/mas_integration.png">
+    <Panel Name="RootPanel">
+        <Grid RowDefinitions="100,Auto,*,30" ColumnDefinitions="*,*" ColumnSpacing="10" RowSpacing="10" Margin="10">
+            <StackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="20" HorizontalAlignment="Center" RenderOptions.BitmapInterpolationMode="HighQuality">
+                <Image Source="Assets/mas_integration.png"></Image>
+                <TextBlock FontSize="24" VerticalAlignment="Center">integratsiooniprogramm</TextBlock>
+            </StackPanel>
+            <Label Grid.Row="1" Grid.Column="0" VerticalAlignment="Center">Menüü</Label>
+            <WrapPanel Grid.Row="1" Grid.Column="0" ItemSpacing="10" HorizontalAlignment="Right" Orientation="Horizontal" ItemsAlignment="End">
+                <Button Name="AddRootItemButton" Click="AddRootItemButton_OnClick">Lisa</Button>
+                <Button Name="RootMenuButton" Click="RootMenu_OnClick" IsVisible="False">Juur</Button>
+                <Button Name="EditItemButton" Click="EditItemButton_OnClick" IsEnabled="False">Muuda</Button>
+                <Button Name="RemoveItemButton" Click="RemoveItemButton_OnClick" IsEnabled="False">Eemalda</Button>
+            </WrapPanel>
+            <Label Grid.Row="1" Grid.Column="1" VerticalAlignment="Center">Olekud</Label>
+            <StackPanel Name="StateButtons" IsEnabled="False" Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
+                <Button Name="AddStateButton" Click="AddStateButton_OnClick">Lisa</Button>
+                <Button Name="EditStateButton" Click="EditStateButton_OnClick" IsEnabled="False">Muuda</Button>
+                <Button Name="RemoveStateButton" Click="RemoveStateButton_OnClick" IsEnabled="False">Eemalda</Button>
+            </StackPanel>
+            <TableView Name="MenuItemsView" Grid.Column="0" Grid.Row="2" ItemsSource="{Binding MenuItems}" SelectionChanged="SelectingItemsControl_OnSelectionChanged" DoubleTapped="InputElement_OnDoubleTapped">
+                <TableView.Columns>
+                    <TableViewColumn Header="ID" x:DataType="avIntegrationSoftware:MenuItemModel" Binding="{Binding MenuIdentifier}"></TableViewColumn>
+                    <TableViewColumn Width="30" Header="Alamüksuseid"  x:DataType="avIntegrationSoftware:MenuItemModel" Binding="{Binding SubItems?.Length, TargetNullValue=0}"></TableViewColumn>
+                    <TableViewColumn Header="Pollimine" x:DataType="avIntegrationSoftware:MenuItemModel" Binding="{Binding StatePoller, TargetNullValue=(pole)}"></TableViewColumn>
+                    <TableViewColumn Width="30" Header="Olekud" x:DataType="avIntegrationSoftware:MenuItemModel" Binding="{Binding States.Length, TargetNullValue=(pole)}"></TableViewColumn>
+                    <TableViewColumn Header="Funktsioonid"  x:DataType="avIntegrationSoftware:MenuItemModel" Binding="{Binding RequiredFeatures, TargetNullValue=(pole)}"></TableViewColumn>
+                </TableView.Columns>
+            </TableView>
+            <TableView Name="MenuStatesView" IsEnabled="False" Grid.Column="1" Grid.Row="2" ItemsSource="{Binding SelectedItem?.States}" SelectionChanged="MenuStatesView_OnSelectionChanged">
+                <TableView.Columns>
+                    <TableViewColumn Header="ID" x:DataType="avIntegrationSoftware:MenuState" Binding="{Binding StateIdentifier}"></TableViewColumn>
+                    <TableViewColumn Header="Toiming"  x:DataType="avIntegrationSoftware:MenuState" Binding="{Binding Action, TargetNullValue=(pole)}"></TableViewColumn>
+                    <TableViewColumn Header="Silt" x:DataType="avIntegrationSoftware:MenuState" Binding="{Binding Label, TargetNullValue=(pole)}"></TableViewColumn>
+                    <TableViewColumn Header="Ikoon" x:DataType="avIntegrationSoftware:MenuState" Binding="{Binding  IconPath, TargetNullValue=(pole)}"></TableViewColumn>
+                </TableView.Columns>
+            </TableView>
+            <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" TextWrapping="Wrap" VerticalAlignment="Center">Muudatused rakendatakse pärast "Salvesta" nupule vajutamist</TextBlock>
+            <StackPanel Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
+                <Button Click="Save_OnClick" Content="Salvesta"></Button>
+                <Button Click="Cancel_OnClick" Content="Loobu"></Button>
+            </StackPanel>
+        </Grid>
+    </Panel>
+    <Window.Styles>
+        <Style Selector="TableView /template/ Border > ScrollViewer#PART_ScrollViewer /template/ Grid > DockPanel > Border">
+            <Setter Property="Height" Value="0"></Setter>
+        </Style>
+        <Style Selector="TableView /template/ Border > ScrollViewer#PART_ScrollViewer /template/ Grid > DockPanel > Border > TableViewColumnHeadersPresenter > TableViewColumnHeader /template/ Panel">
+            <Setter Property="Margin" Value="99999, 0,0, 0"></Setter>
+        </Style>
+        <Style Selector="TableView">
+            <Setter Property="Background" Value="Transparent"></Setter>
+        </Style>
+    </Window.Styles>
+</Window>

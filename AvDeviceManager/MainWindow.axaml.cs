@@ -58,7 +58,7 @@ public partial class MainWindow : Window
     private void DataGrid_OnSelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         if (sender is not TableView tableView) return;
-        RemoveDeviceButton.IsEnabled = tableView?.SelectedItems?.Count > 0;
+        RemoveDeviceButton.IsEnabled = tableView.SelectedItems?.Count > 0;
     }
 
     private void Refresh()

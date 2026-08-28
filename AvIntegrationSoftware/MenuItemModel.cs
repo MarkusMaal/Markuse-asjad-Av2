@@ -151,5 +151,5 @@ public class MenuState
     public required string StateIdentifier { get; set; }
     public required string Label { get; set; }
     public required string IconPath { get; set; }
-    public required string Action { get; set; }
+    public required string? Action { get; set; }
 }

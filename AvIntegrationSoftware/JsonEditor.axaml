@@ -1,0 +1,32 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" Width="500" Height="175"
+        x:Class="AvIntegrationSoftware.JsonEditor" Icon="Assets/mas_integration.png"
+        Title="Menüü üksuse redigeerimine" Loaded="MenuItemEditor_Loaded">
+    <Panel>
+        <Grid Margin="10" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+            <Label Grid.Row="0" Grid.Column="0">ID</Label>
+            <TextBox Name="IdBox" Grid.Row="0" Grid.Column="1"></TextBox>
+            <Label Grid.Row="1" Grid.Column="0">Oleku pollimine</Label>
+            <TextBox Name="PollBox" Grid.Row="1" Grid.Column="1"></TextBox>
+            <Label Grid.Row="2" Grid.Column="0">Funktsioonid</Label>
+            <TextBox Name="FeatureBox" Grid.Row="2" Grid.Column="1"></TextBox>
+            <CheckBox Name="SubmenuCheckbox" Grid.Row="3" Grid.Column="0" Content="Alamenüü" />
+            <StackPanel Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right" Orientation="Horizontal" Spacing="10">
+                <Button Name="OkButton" Click="OkButton_OnClick">OK</Button>
+                <Button Name="CancelButton" Click="CancelButton_OnClick">Loobu</Button>
+            </StackPanel>
+            <Grid.Styles>
+                <Style Selector="Label">
+                    <Setter Property="VerticalAlignment" Value="Center"></Setter>
+                </Style>
+                <Style Selector="Button">
+                    <Setter Property="MinWidth" Value="80"></Setter>
+                    <Setter Property="HorizontalContentAlignment" Value="Center"></Setter>
+                </Style>
+            </Grid.Styles>
+        </Grid>
+    </Panel>
+</Window>

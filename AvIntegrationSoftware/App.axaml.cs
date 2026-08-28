@@ -89,6 +89,21 @@ public class App : Application
                 desktop.ShutdownMode = ShutdownMode.OnLastWindowClose;
                 return;
             }
+
+            if (desktop.Args.Contains("--menu-editor"))
+            {
+                if (_splashScreen.IsVisible)
+                    _splashScreen.Hide();
+                var currentApp = (App?)Current;
+                if (currentApp == null) return;
+                TrayIcon.SetIcons(currentApp,null);
+                desktop.MainWindow = new MenuEditor()
+                {
+                    Title = "Menüüredaktor (primitiivne režiim)"
+                };
+                desktop.ShutdownMode = ShutdownMode.OnMainWindowClose;
+                return;
+            }
             if (desktop.Args.Contains("/e"))
             {
                 Crash c = new()
