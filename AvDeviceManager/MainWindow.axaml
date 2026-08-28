@@ -12,36 +12,47 @@
             <TextBlock TextAlignment="Center" VerticalAlignment="Center" Text="Seotud seadmed" FontSize="20"></TextBlock>
         </StackPanel>
         <TextBlock Grid.Row="1" Name="EmptyLabel" Text="(seadmeid pole)" HorizontalAlignment="Center" VerticalAlignment="Center"></TextBlock>
-        <DataGrid Grid.Row="1" ItemsSource="{Binding Devices}"
-                  IsReadOnly="True" Name="DeviceGrid"
-                  CanUserReorderColumns="False"
+        <TableView Grid.Row="1" ItemsSource="{Binding Devices}"
+                  Name="DeviceGrid"
                   CanUserResizeColumns="True"
-                  CanUserSortColumns="True"
-                  GridLinesVisibility="Horizontal"
                   SelectionMode="Single"
                   BorderThickness="0"
-                  Margin="10"
+                  Margin="10, 0"
                   SelectionChanged="DataGrid_OnSelectionChanged"
-                  HeadersVisibility="None" IsVisible="False"
+                  IsVisible="False" Background="Transparent"
                   Grid.Column="0">
-            <DataGrid.Columns>
-                <DataGridTemplateColumn>
-                    <DataGridTemplateColumn.CellTemplate>
+            <TableView.Columns>
+                <TableViewColumn>
+                    <TableViewColumn.CellTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Horizontal" Spacing="10" Margin="5">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
                                 <Image Source="{Binding DeviceIcon}" Width="32" RenderOptions.BitmapInterpolationMode="HighQuality"></Image>
                                 <TextBlock Text="{Binding DeviceTypeFriendly}" VerticalAlignment="Center" Margin="0, 0,25,0"/>
                             </StackPanel>
                         </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTextColumn Binding="{Binding DeviceIp}"></DataGridTextColumn>
-            </DataGrid.Columns>
-        </DataGrid>
+                    </TableViewColumn.CellTemplate>
+                </TableViewColumn>
+                <TableViewColumn>
+                    <TableViewColumn.CellTemplate>
+                        <DataTemplate>
+                            <Label VerticalAlignment="Center" Content="{Binding DeviceIp}" Margin="0,0,0,-1"></Label>
+                        </DataTemplate>
+                    </TableViewColumn.CellTemplate>
+                </TableViewColumn>
+            </TableView.Columns>
+        </TableView>
         <WrapPanel Grid.Row="2" Margin="10,0,10,10" ItemSpacing="10" LineSpacing="10">
             <Button Name="AddDeviceButton" IsEnabled="True" Click="AddDeviceButton_OnClick">Lisa seade</Button>
             <Button Name="RemoveDeviceButton" IsEnabled="False" Click="RemoveDeviceButton_OnClick">Eemalda seade</Button>
             <Button Name="RefreshButton" IsEnabled="True" Click="RefreshButton_OnClick">Laadi uuesti</Button>
         </WrapPanel>
     </Grid>
+    <Window.Styles>
+        <Style Selector="TableView /template/ Border > ScrollViewer#PART_ScrollViewer /template/ Grid > DockPanel > Border">
+            <Setter Property="Height" Value="0"></Setter>
+        </Style>
+        <Style Selector="TableView /template/ Border > ScrollViewer#PART_ScrollViewer /template/ Grid > DockPanel > Border > TableViewColumnHeadersPresenter > TableViewColumnHeader /template/ Panel">
+            <Setter Property="Margin" Value="99999, 0,0, 0"></Setter>
+        </Style>
+    </Window.Styles>
 </Window>
