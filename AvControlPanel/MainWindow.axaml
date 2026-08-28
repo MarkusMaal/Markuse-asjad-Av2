@@ -1,0 +1,100 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:AvControlPanel.Controls"
+        mc:Ignorable="d" Width="929" Height="681"  KeyUp="InputElement_OnKeyUp"
+        x:Class="AvControlPanel.MainWindow" KeyDown="InputElement_OnKeyDown" PointerMoved="InputElement_OnPointerMoved"
+        Title="Info kogumine..." Icon="Assets\mas_cpanel.png" Loaded="Control_OnLoaded">
+    <Grid RowDefinitions="Auto,*" RowSpacing="5" Name="RootGrid">
+        <StackPanel Name="LogoPanel" Grid.Row="0" Orientation="Horizontal" Spacing="30" HorizontalAlignment="Center" IsVisible="False">
+            <Image Source="Assets\mas_cpanel.png" Width="200" RenderOptions.BitmapInterpolationMode="HighQuality" Margin="-20"></Image>
+        </StackPanel>
+        <Button Click="CloseButton_OnClick" Classes="SimpleCloseButton" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Top" Name="CloseButton" IsTabStop="False" Margin="10" IsVisible="False" BorderThickness="1" BorderBrush="White" Background="DarkRed" Foreground="White" Padding="5" CornerRadius="0">
+            <TextBlock><Run Text="." Foreground="DarkRed" />X<Run Text="." Foreground="DarkRed" /></TextBlock>
+        </Button>
+        <TextBlock Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Top"  Name="TipLabel" IsTabStop="False" Margin="10" IsVisible="False" TextAlignment="Right">
+            <Label HorizontalAlignment="Right" HorizontalContentAlignment="Right" Content="Alt+F4 = Sulge" Margin="0,0,0,-5" />
+            <LineBreak />
+            <Label Content="Alt+H = Kiirkla_hvid"/>
+        </TextBlock>
+        <StackPanel Margin="0,-50,0,0" Orientation="Vertical" Name="CheckSysLabel" Grid.Row="0" Grid.RowSpan="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Image Name="LoaderLogo" IsVisible="True" Source="Assets/mas_cpanel.png" RenderOptions.BitmapInterpolationMode="HighQuality" Margin="0,10,0,20" Height="64" Width="64"/>
+            <Image Name="FailGif" IsVisible="False" Source="Assets/failure.gif" Margin="0,10,0,20" Height="64" Width="64"/>
+            <Label Name="InfoCollectLabel" Classes="H1" HorizontalAlignment="Center">Info kogumine...</Label>
+            <TextBlock Margin="0,10,0,0" Name="ProgressStatusLabel" HorizontalAlignment="Stretch" TextAlignment="Center" />
+            <ProgressBar Foreground="White" Name="CollectProgress" Margin="0,10,0,0" ></ProgressBar>
+            <Button HorizontalAlignment="Center" IsVisible="False" Name="ErrorExitButton" Click="ErrorExitButton_OnClick">Sulge programm</Button>
+        </StackPanel>
+        <TabControl Name="MainTabControl" Grid.Row="1" IsVisible="False" Margin="0, -20,0,0">
+            <TabItem Header="Skriptid" Name="ScriptTab">
+                <ScrollViewer>
+                    <controls:Scripts Name="ScriptsPanel"></controls:Scripts>
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="MarkuStation" Name="MarkuStationTab">
+                <ScrollViewer>
+                    <controls:MarkuStation Name="MarkuStationPanel" />
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="Konfiguratsioon" Name="ConfigTab">
+                <ScrollViewer>
+                    <controls:Configuration Name="ConfigurationPanel" />
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="Töölaud" Name="DesktopTab">
+                <ScrollViewer>
+                    <controls:Desktop Name="DesktopPanel"></controls:Desktop>
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="Teave">
+                <ScrollViewer>
+                    <controls:About Name="AboutPanel"></controls:About>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+    </Grid>
+    <!-- Styles -->
+    <Window.Styles>
+        <Style Selector="Window">
+            <Setter Property="FontFamily" Value="Segoe UI,Ubuntu,sans-serif"/>
+        </Style>
+        <Style Selector="Button">
+            <Setter Property="Margin" Value="0,10,10,10"/>
+        </Style>
+        <Style Selector="Label.H1">
+            <Setter Property="FontSize" Value="20"/>
+        </Style>
+        <Style Selector="WrapPanel">
+            <Setter Property="Orientation" Value="Horizontal"/>
+        </Style>
+        <Style Selector="WrapPanel.Left">
+            <Setter Property="HorizontalAlignment" Value="Left" />
+        </Style>
+        <Style Selector="TabItem > AccessText">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="TabControl > TabItem">
+            <Setter Property="FontSize" Value="15" />
+        </Style>
+        <Style Selector="TabControl WrapPanel">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="StackPanel">
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+        <Style Selector="StackPanel.NM">
+            <Setter Property="Margin" Value="0"/>
+        </Style>
+        <Style Selector="CheckBox">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+        <Style Selector="Button.SimpleCloseButton:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#a00" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="White" />
+        </Style>
+    </Window.Styles>
+</Window>

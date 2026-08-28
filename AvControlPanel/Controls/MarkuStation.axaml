@@ -1,0 +1,54 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:markuStation="clr-namespace:AvControlPanel.Models.MarkuStation"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="AvControlPanel.Controls.MarkuStation" DataContext="{Binding RelativeSource={RelativeSource Self}}">
+  <StackPanel>
+    <Label Classes="H1">MarkuStation</Label>
+    <Label>Mängud</Label>
+    <TableView Height="165" Margin="15,10" Name="GameList" DoubleTapped="MsGameEdit" ItemsSource="{Binding MarkuStationGames}">
+      <TableView.Columns>
+        <TableViewColumn Binding="{Binding Name}" Width="200" Header="Nimi" />
+        <TableViewColumn Binding="{Binding Executable}" Header="Käivitatav rakendus" />
+      </TableView.Columns>
+    </TableView>
+    <StackPanel Orientation="Horizontal">
+      <StackPanel>
+        <Label>Lisa</Label>
+        <StackPanel Orientation="Horizontal">
+          <Label>Mängu nimi</Label>
+          <TextBox Name="GameNameBox" Width="200" Margin="15,0,0,0"></TextBox>
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Height="30">
+          <Label>Asukoht</Label>
+          <TextBox Name="LocationBox" Width="200" Margin="15,0,0,0"></TextBox>
+          <Button Height="30" Margin="10,0" FontSize="14" Click="BrowseButtonAsync">...</Button>
+        </StackPanel>
+        <Button Click="AddButton">Lisa</Button>
+      </StackPanel>
+      <StackPanel>
+        <Label>Varia</Label>
+        <CheckBox Name="CreepCheck" IsChecked="{Binding MarkuStationConfig.CreepypastaIntro}">Luba creepypasta intro</CheckBox>
+        <CheckBox Name="SpecialCheck" IsChecked="{Binding MarkuStationConfig.SpecialIntro}">Luba special intro</CheckBox>
+        <CheckBox Name="IntroCheck" IsChecked="{Binding MarkuStationConfig.PlayIntros}">Luba introd</CheckBox>
+        <CheckBox Name="legacyIntroCheck" IsChecked="{Binding MarkuStationConfig.LegacyIntro}">Luba pärandintro</CheckBox>
+        <StackPanel Orientation="Horizontal">
+          <Label Margin="0,0,15,0">Kuva</Label>
+          <ComboBox Name="MonMode" SelectedValueBinding="{Binding MarkuStationConfig.MonitorMode}" SelectedIndex="{Binding MarkuStationConfig.MonitorMode}">
+            <ComboBoxItem>Kuva ainult esimene ekraan (sisemine)</ComboBoxItem>
+            <ComboBoxItem>Kuva ainult teine ekraan (väline)</ComboBoxItem>
+            <ComboBoxItem>Laienda</ComboBoxItem>
+            <ComboBoxItem>Dubleeri</ComboBoxItem>
+          </ComboBox>
+        </StackPanel>
+      </StackPanel>
+    </StackPanel>
+    <StackPanel Orientation="Horizontal">
+      <Button Click="RunMs">Käivita MarkuStation</Button>
+      <Button Name="LoadButton" Click="MsLoadSettings">Laadi seadistused</Button>
+      <Button Click="MsSaveConfig">Salvesta seadistused</Button>
+    </StackPanel>
+  </StackPanel>
+</UserControl>

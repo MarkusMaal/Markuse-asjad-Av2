@@ -1,0 +1,52 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:masCommon="clr-namespace:MasCommon;assembly=MasCommon"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             DataContext="{Binding RelativeSource={RelativeSource Self}}"
+             x:Class="AvControlPanel.Controls.Desktop">
+  <StackPanel Orientation="Horizontal">
+    <StackPanel>
+      <Label Classes="H1" Margin="0,10">Ikoonid</Label>
+      <StackPanel Orientation="Horizontal">
+        <Label Margin="-3, 3, 10, 3">Ikoonide arv</Label>
+        <TextBox Name="DesktopIconCountX" Text="{Binding DesktopLayoutObject.IconCountX}">
+        </TextBox><Label Margin="5,5,5,0">x</Label>
+        <TextBox Name="DesktopIconCountY" Text="{Binding DesktopLayoutObject.IconCountY}">
+        </TextBox>
+      </StackPanel>
+      <StackPanel Orientation="Horizontal">
+        <Label Margin="-3, 4, 10, 3">Veeris</Label>
+        <TextBox Name="DesktopIconPadding" Text="{Binding DesktopLayoutObject.IconPadding}"></TextBox>
+        <Label Margin="3, 4, 10, 3">px</Label>
+      </StackPanel>
+      <StackPanel Orientation="Horizontal">
+        <Label Margin="-3, 4, 10, 3">Suurus (suhteline)</Label>
+        <TextBox Name="DesktopIconSize" Text="{Binding DesktopLayoutObject.IconSize}"></TextBox>
+        <Label Margin="3, 4, 10, 3">px</Label>
+      </StackPanel>
+      <Button Name="ApplyIconSettingsButton" Click="ApplyIconSettingsButton_OnClick">Rakenda</Button>
+      <Label Classes="H1" Margin="0,10">Varia</Label>
+      <CheckBox IsCheckedChanged="Misc_OnIsCheckedChanged" Name="DesktopIconsCheck" IsChecked="{Binding DesktopLayoutObject.ShowIcons}" >Kuva töölauaikoonid</CheckBox>
+      <CheckBox IsCheckedChanged="Misc_OnIsCheckedChanged" Name="DesktopLogoCheck" IsChecked="{Binding DesktopLayoutObject.ShowLogo}" >Kuva Markuse asjad logo</CheckBox>
+      <CheckBox IsCheckedChanged="Misc_OnIsCheckedChanged" Name="DesktopActionCheck" IsChecked="{Binding DesktopLayoutObject.ShowActions}" >Kuva juhtnupud</CheckBox>
+      <CheckBox IsCheckedChanged="Misc_OnIsCheckedChanged" Name="DesktopLockedCheck" IsChecked="{Binding DesktopLayoutObject.LockIcons}" >Lukusta ikoonid</CheckBox>
+    </StackPanel>
+    <StackPanel Margin="100,0,0,0">
+      <Label Classes="H1" Margin="0,0,0,10">Rakendused</Label>
+      <TableView Name="DesktopApps" MaxHeight="300" Width="450" MinWidth="450" MaxWidth="450" DoubleTapped="DesktopApps_OnPointerPressed" ItemsSource="{Binding DesktopLayoutObject.Children}">
+        <TableView.Columns>
+          <TableViewColumn x:DataType="masCommon:DesktopIcon" Header="Ikoon" Binding="{Binding Icon}" Width="120"></TableViewColumn>
+          <TableViewColumn x:DataType="masCommon:DesktopIcon" Header="Käivitatav programm" Binding="{Binding Executable}"></TableViewColumn>
+        </TableView.Columns>
+      </TableView>
+      <StackPanel Orientation="Horizontal">
+        <Button Name="DesktopJsonEditButton" Click="DesktopJSONEditButton_OnClick">JSON redigeerimine</Button>
+        <Button Name="DesktopIconsRestart" Click="DesktopIconsRestart_OnClick">Taaskäivita</Button>
+        <Button Name="DesktopIconsResetDefaults" Click="DesktopIconsResetDefaults_OnClick">Taasta vaikesätted</Button>
+        <Button Name="DesktopIconsAddButton" Click="DesktopIconsAddButton_OnClick">Lisa</Button>
+      </StackPanel>
+    </StackPanel>
+  </StackPanel>
+</UserControl>

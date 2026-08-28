@@ -1,0 +1,112 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="AvControlPanel.Controls.About" DataContext="{Binding RelativeSource={RelativeSource Self}}">
+  <Grid>
+    <Panel HorizontalAlignment="Right" VerticalAlignment="Top" Margin="5">
+      <TextBlock Name="WhatNewLabel" TextAlignment="Right" Text="{Binding WhatNew}"/>
+    </Panel>
+    <Panel>
+      <StackPanel>
+        <Label Name="DeviceCpanelLabel" Classes="H1">Juhtpaneel</Label>
+        <Label Name="CpanelVersionLabel" Content="{Binding EditionInfo.CpanelVersion}">
+          <ToolTip.Tip>
+            <TextBlock>
+              Programmi versioon.<LineBreak/>
+              Versioonid x.1x - x.4x tähistavad ebastabiilset versiooni<LineBreak/>
+              Versioonid x.5x - x.9x tähistavad poolstabiilset versiooni<LineBreak/>
+              Versioonid x.0x tähistavad stabiilset versiooni<LineBreak/>
+              Esimene number tähistab stabiilse versiooni numbrit. 0 tähendab,<LineBreak/>
+              et stabiilset versiooni ei eksisteeri.
+            </TextBlock>
+          </ToolTip.Tip>
+        </Label>
+        <Label Margin="0,10,0,0">kasutab Avalonia UI raamistikku</Label>
+        <Label Content="{Binding Copyright}"></Label>
+        <Panel Margin="0,10">
+          <StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+              <Panel>
+                <Rectangle Name="EditionBox" Fill="{Binding EditionInfo.EditionColor}" MinWidth="100" MinHeight="100">
+                </Rectangle>
+                <Polygon Name="Glass" Points="0,0 100,0 0,100">
+                  <Polygon.Fill>
+                    <LinearGradientBrush StartPoint="50,0" EndPoint="50,100">
+                      <GradientStop Color="#80FFFFFF" Offset="0.0"></GradientStop>
+                      <GradientStop Color="Transparent" Offset="0.6"></GradientStop>
+                    </LinearGradientBrush>
+                  </Polygon.Fill>
+                </Polygon>
+                <ToolTip.Tip>
+                  <StackPanel>
+                    <TextBlock FontSize="16">Värvid tähistavad kindlat väljaannet:</TextBlock>
+                    <TextBlock><Run Text="Lilla" Foreground="BlueViolet" /> - Ultimate</TextBlock>
+                    <TextBlock><Run Text="Helesinine" Foreground="DeepSkyBlue" /> - Pro</TextBlock>
+                    <TextBlock><Run Text="Punane" Foreground="DarkRed" /> - Premium</TextBlock>
+                    <TextBlock><Run Text="Kollane/kuldne" Foreground="Gold" /> - Basic/Basic+</TextBlock>
+                    <TextBlock><Run Text="Roheline" Foreground="Lime" /> - Starter</TextBlock>
+                    <TextBlock><Run Text="Hall" Foreground="Gray" /> - Tundmatu väljaanne</TextBlock>
+                  </StackPanel>
+                </ToolTip.Tip>
+              </Panel>
+              <StackPanel Margin="0">
+                <Label Name="MasName" Margin="15,-5" FontSize="25" FontWeight="SemiLight" VerticalAlignment="Top" ToolTip.Tip="Kuvab mis liiki Markuse asjaga on tegemist." Content="{Binding EditionInfo.DeviceDescription}"></Label>
+                <Label Name="MasEditionLabel" Margin="15,3" FontSize="18" FontWeight="SemiLight" VerticalAlignment="Top" ToolTip.Tip="Väljaanne tekstina." Content="{Binding EditionInfo.EditionName}"></Label>
+              </StackPanel>
+            </StackPanel>
+            <TextBlock Name="EditionDetails" Margin="0,16" TextWrapping="WrapWithOverflow" Width="400" HorizontalAlignment="Left" Text="{Binding EditionInfo.EditionInfo}">
+            </TextBlock>
+        </StackPanel>
+          <StackPanel HorizontalAlignment="Right">
+            <Label Margin="-5,5">Funktsioonid</Label>
+            <WrapPanel Width="400">
+              <StackPanel Classes="NM" Orientation="Horizontal" VerticalAlignment="Center">
+                <Image Name="FeatTS" MaxHeight="32" MaxWidth="32" Source="{Binding EditionInfo.FeatTs}" ></Image>
+                <Label Margin="10,10" ToolTip.Tip="Kui see funktsioon on saadaval, siis on võimalik peita ja kuvada kõik töölauaikoonid">Interaktiivne töölaud</Label>
+              </StackPanel>
+              <StackPanel Classes="NM" Orientation="Horizontal" VerticalAlignment="Center">
+                <Image Name="FeatRM" MaxHeight="32" MaxWidth="32" Source="{Binding EditionInfo.FeatRm}" ></Image>
+                <Label ToolTip.Tip="Kui saadaval, on töölaual kohandatud kujundusega ikoonid koos kuupäeva ja kellaajaga" Margin="10,10">Rainmeter</Label>
+              </StackPanel>
+              <StackPanel Classes="NM" Orientation="Horizontal" VerticalAlignment="Center">
+                <Image Name="FeatIP" MaxHeight="32" MaxWidth="32" Source="{Binding EditionInfo.FeatIp}" ></Image>
+                <Label Margin="10,10" ToolTip.Tip="Kui saadaval, siis asub tegumiribal Markuse asjade ikoon, mille kaudu saab arvutit hallata.">Integratsioonitarkvara</Label>
+              </StackPanel>
+              <StackPanel Classes="NM" Orientation="Horizontal" VerticalAlignment="Center">
+                <Image Name="FeatCS" MaxHeight="32" MaxWidth="32" Source="{Binding EditionInfo.FeatCs}" ></Image>
+                <Label Margin="10,10" ToolTip.Tip="Kui saadaval, siis Open Shell vms on paigaldatud ning Windows 10 start menüü või Windows 8 avakuva asemel kuvatakse klassikalisemas stiilis Windowsi stardimenüü">Klassikaline start menüü</Label>
+              </StackPanel>
+              <StackPanel Classes="NM" Orientation="Horizontal" VerticalAlignment="Center">
+                <Image Name="FeatMM" MaxHeight="32" MaxWidth="32" Source="{Binding EditionInfo.FeatMm}" ></Image>
+                <Label Margin="10,10" ToolTip.Tip="Kui saadaval, on arvuti juurutatud Markuse asjade jaoks.">Standardfunktsioonid</Label>
+              </StackPanel>
+              <StackPanel Classes="NM" Orientation="Horizontal" VerticalAlignment="Center">
+                <Image Name="FeatRD" MaxHeight="32" MaxWidth="32" Source="{Binding EditionInfo.FeatRd}" ></Image>
+                <Label Margin="10,10" ToolTip.Tip="Kui saadaval, on võimalik arvutit kaugjuhtida Markuse tahvelarvuti ja telefoni abil.">Kaugjuhtimine</Label>
+              </StackPanel>
+              <StackPanel Classes="NM" Orientation="Horizontal" VerticalAlignment="Center">
+                <Image Name="FeatWX" MaxHeight="32" MaxWidth="32" Source="{Binding EditionInfo.FeatWx}" ></Image>
+                <Label Margin="10,10" ToolTip.Tip="Kui saadaval, on võimalik arvutis käivitada kõige hilisemat Windowsi versiooni.">Windows 10+</Label>
+              </StackPanel>
+              <StackPanel Classes="NM" Orientation="Horizontal" VerticalAlignment="Center">
+                <Image Name="FeatLT" MaxHeight="32" MaxWidth="32" Source="{Binding EditionInfo.FeatLt}" ></Image>
+                <Label Margin="10,10" ToolTip.Tip="Kui saadaval, on arvutisse paigaldatud LiveTuner, mis optimeerib arvuti kiirust iga kord kui arvuti käivitub.">LiveTuner optimeerimised</Label>
+              </StackPanel>
+              <StackPanel Classes="NM" Orientation="Horizontal" VerticalAlignment="Center">
+                <Image Name="FeatGP" MaxHeight="32" MaxWidth="32" Source="{Binding EditionInfo.FeatGp}" ></Image>
+                <Label Margin="10,10" ToolTip.Tip="Kui saadaval, on võimalik muuta arvuti sätteid grupipolliitika abil.">Grupipoliitika</Label>
+              </StackPanel>
+            </WrapPanel>
+          </StackPanel>
+        </Panel>
+      </StackPanel>
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom">
+        <Button Click="Reload_OnClick" Content="_Värskenda andmeid" ToolTip.Tip="Juhul kui mingi muu programm on teinud konfiguratsioonis muudatusi, saate seda valikut, et neid muudatusi näha"></Button>
+        <Button Click="ComputerInfoClicked" Content="Arvuti _teave" ToolTip.Tip="Lisainfo arvuti kohta"></Button>
+        <Button Click="OpenMasRootClicked" ToolTip.Tip="Markuse asjade süsteem (mas) kaust sisaldab olulisi faile Markuse asjade toimimiseks">Ava mas kaust</Button>
+      </StackPanel>
+    </Panel>
+  </Grid>
+</UserControl>

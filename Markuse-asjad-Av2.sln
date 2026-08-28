@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MasCommon", "MasCommon\MasC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AvDeviceManager", "AvDeviceManager\AvDeviceManager.csproj", "{38245A75-BD81-474A-AAE6-18A1D4BFB8ED}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AvControlPanel", "AvControlPanel\AvControlPanel.csproj", "{BB3C891E-4142-495E-B07D-4BD1B2FBCC5A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{38245A75-BD81-474A-AAE6-18A1D4BFB8ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{38245A75-BD81-474A-AAE6-18A1D4BFB8ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{38245A75-BD81-474A-AAE6-18A1D4BFB8ED}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BB3C891E-4142-495E-B07D-4BD1B2FBCC5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB3C891E-4142-495E-B07D-4BD1B2FBCC5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB3C891E-4142-495E-B07D-4BD1B2FBCC5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB3C891E-4142-495E-B07D-4BD1B2FBCC5A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

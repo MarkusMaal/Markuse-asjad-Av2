@@ -41,7 +41,7 @@ public partial class About : Window
         var masVer = File.ReadAllLines(Path.Join(App.MasRoot, "edition.txt"));
         var edition = masVer[1];
         var fi = new FileInfo(Path.Join(App.MasRoot, "edition.txt"));
-        this.GetControl<Label>("MasEditionLabel").Content = edition;
+        MasEditionLabel.Content = edition;
         EditionBox.Fill = edition switch
         {
             "Basic" or "Basic+" => new SolidColorBrush(Colors.Yellow),

@@ -1,0 +1,33 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:avControlPanel="clr-namespace:AvControlPanel"
+        mc:Ignorable="d" Width="450" Height="180" Loaded="Control_OnLoaded"
+        x:Class="AvControlPanel.Dialogs.DesktopIconEdit"
+        Title="Töölauaikooni muutmine">
+    <Window.DataContext>
+        <avControlPanel:Program />
+    </Window.DataContext>
+    <Panel Margin="20">
+        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Top" ColumnDefinitions="100,*,40" RowDefinitions="*,*">
+            <Label VerticalAlignment="Center" Grid.Row="0" Grid.Column="0">Ikoon</Label>
+            <ComboBox HorizontalAlignment="Stretch" Name="NameBox" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,10" ItemsSource="{Binding AvailableIcons}" x:DataType="avControlPanel:Program"></ComboBox>
+            <Label VerticalAlignment="Center" Grid.Row="1" Grid.Column="0">Käsurida</Label>
+            <TextBox Name="LocationBox" Grid.Row="1" Grid.Column="1"></TextBox>
+            <Button Click="BrowseButtonAsync" Margin="10,0,0,0" Grid.Row="1" Grid.Column="2">...</Button>
+        </Grid>
+        <StackPanel HorizontalAlignment="Right" VerticalAlignment="Bottom" Orientation="Horizontal">
+            <Button Name="DeleteButton" Click="Delete_Click" Classes="BB">Kustuta</Button>
+            <Button Click="Cancel_Click" Classes="BB">Loobu</Button>
+            <Button Click="OK_Click" Classes="BB">OK</Button>
+        </StackPanel>
+    </Panel>
+    <Window.Styles>
+        <Style Selector="Button.BB">
+            <Setter Property="MinWidth" Value="80"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="10,0,0,0"/>
+        </Style>
+    </Window.Styles>
+</Window>

@@ -1,0 +1,41 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="500"
+             x:Class="AvControlPanel.Controls.Configuration" DataContext="{Binding RelativeSource={RelativeSource Self}}">
+    <StackPanel>
+      <Label Classes="H1" Margin="0,10">Integratsioon</Label>
+      <Label Name="ConfigNoticeLabel">Muudatused rakendatakse pärast Markuse asjade taaskäivitamist</Label>
+      <CheckBox Name="ShowMasLogoCheck" IsChecked="{Binding MasCommonConfig.ShowLogo}">Kuva Markuse asjade logo integratsioonitarkvara käivitumisel</CheckBox>
+      <CheckBox Name="AllowScheduledTasksCheck" IsChecked="{Binding MasCommonConfig.AllowScheduledTasks}">Luba ajastatud sündmused</CheckBox>
+      <CheckBox Name="StartDesktopNotesCheck" IsChecked="{Binding MasCommonConfig.AutostartNotes}">Käivita töölauamärkmed käivitumisel</CheckBox>
+      <StackPanel Orientation="Horizontal">
+        <Label Margin="-3, 4, 10, 3">Pollimise sagedus</Label>
+        <TextBox Name="IntegrationPollrate" Text="{Binding MasCommonConfig.PollRate}"></TextBox>
+        <Label Margin="3, 4, 10, 3">ms</Label>
+      </StackPanel>
+      <Button Click="ConfigCheck">Rakenda</Button>
+      <Label Classes="H1" Margin="0,10">Taustad</Label>
+      <WrapPanel HorizontalAlignment="Center" Orientation="Horizontal" Margin="0,-40,0,0">
+        <StackPanel Margin="0,0">
+          <Image Name="ThumbDesktop" Width="200" Height="200" DoubleTapped="ChangeDesktop" Source="{Binding DesktopBackground}"></Image>
+          <Label HorizontalAlignment="Center">Töölaud</Label>
+        </StackPanel>
+        <StackPanel Margin="20,0,0,0">
+          <Image Name="ThumbLockscreen" Width="200" Height="200" DoubleTapped="ChangeLogin" Source="{Binding LoginBackground}"></Image>
+          <Label HorizontalAlignment="Center">Logimisekraan</Label>
+        </StackPanel>
+        <StackPanel Margin="20,0,0,0">
+          <Image Name="ThumbMiniversion" Width="200" Height="200" DoubleTapped="ChangeMini" Source="{Binding UncommonBackground}"></Image>
+          <Label HorizontalAlignment="Center">Miniversioon</Label>
+        </StackPanel>
+      </WrapPanel>
+      <WrapPanel>
+        <Button Click="SwapBgs" Content="_Vaheta miniversioon töölauataustaga"></Button>
+        <Button Click="EditScheds" Content="Redigeeri a_jastatud sündmuseid"></Button>
+        <Button Click="EditBg" Content="T_eema taust"></Button>
+        <Button Click="EditFg" Content="Teema tekstiv_ärv"></Button>
+      </WrapPanel>
+    </StackPanel>
+</UserControl>
