@@ -30,6 +30,8 @@ Uued Markuse arvuti asjade programmid, mis vastavad Markuse asjad Av2 standardit
 
 ### Konfigureerimine
 
+UUS: Konfigureerimine on nüüd võimalik graafilise liidese kaudu - selleks käivita integratsiooniprogramm `--menu-editor` parameetriga.
+
 1. Juuruta arvuti vastavalt Markuse asjad süsteemi nõuetele
 2. Loo Markuse asjade juurkaustas kataloog "integration_data"
 3. Lisa sinna konfiguratsioonifail "Config.json" sarnase sisuga
@@ -140,3 +142,30 @@ Võimalik on sisse lülitada ka põhjalik logimine. Selleks lisage kasutaja kodu
 * Valikuline väljaande funktsioon "RD" peab olema sisse lülitatud
 * Lisa otsetee Integratsiooniprogrammi menüüsse (vt Integratsiooniprogramm > Konfigureerimine)
 * Taaskäivita Markuse asjad (juhtpaneeli kaudu)
+
+## Juhtpaneel
+
+![Juhtpaneeli ikoon](.img/cpanel_s.png)
+
+### Ühilduvad väljaanded
+* Basic+ (`MM` funktsiooniga)
+* Premium (`MM-IP` funktsioonidega, valikuline `TS` funktsioon)
+* Pro (`MM-IP` funktsioonidega, valikuline `TS` funktsioon)
+
+### Funktsioonid
+* Konfigureeritav skriptimenüü (sama süsteem, mis on kasutusel [mas-tui]([https://github.com/MarkusMaal/mas-tui](https://github.com/MarkusMaal/mas-tui/wiki/Skriptimen%C3%BC%C3%BC-faili-lisamine)) jaoks)
+* MarkuStationi mängude haldamine, konfigureerimine
+* Markuse arvuti asjade konfigureerimine
+  * Integratsiooniprogrammi sätete muutmine
+  * Taustapiltide muutmine
+  * Värvide muutmine
+* Töölauasüsteemi konfigureerimine
+  * Ikoonide ruudustiku seadistamine
+  * Ikoonide, logode ja juhtnuppude kuvamine/peitmine/lukustamine
+  * Viivituseta muudatuste rakendumine
+  * Ikoonide lisamine/muutmine/eemaldamine
+  * Töölauasüsteemi taaskäivitamine/vaikesätete taastamine
+* Teave arvuti ja juhtpaneeli kohta
+  * Sama info mis integratsiooniprogrammi teabeaknas
+  * Programmi info, sh versioon, autoriõigus, muudatuselogi
+  * Nupud andmete värskendamiseks, arvuti teabe hankimiseks ja mas kausta avamiseks
