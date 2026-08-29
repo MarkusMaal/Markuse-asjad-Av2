@@ -1,11 +1,16 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="AvControlPanel.App"
-             RequestedThemeVariant="Dark">
+             RequestedThemeVariant="Dark" Name="Juhtpaneel">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
     <Application.Styles>
         <FluentTheme />
         <StyleInclude Source="avares://Avalonia.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
     </Application.Styles>
+     <NativeMenu.Menu>
+         <NativeMenu>
+             <NativeMenuItem Header="Välju" Gesture="Meta+Q" Click="NativeMenuItem_OnClick"></NativeMenuItem>
+         </NativeMenu>
+     </NativeMenu.Menu>
 </Application>

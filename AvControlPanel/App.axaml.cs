@@ -25,4 +25,10 @@ public class App : Application
 
         base.OnFrameworkInitializationCompleted();
     }
+
+    private void NativeMenuItem_OnClick(object? sender, EventArgs e)
+    {
+        if (Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
+        desktop.Shutdown();
+    }
 }
