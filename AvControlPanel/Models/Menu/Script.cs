@@ -11,6 +11,7 @@ public class Script
 
     public void AddCommand(Shell command)
     {
+        Program.Log($"Adding shell command to script: '{command.Command}'");
         Commands ??= [];
         var cmds = new Shell[Commands.Length + 1];
         Array.Copy(Commands, cmds, Commands.Length);
@@ -20,11 +21,13 @@ public class Script
 
     public void Run()
     {
+        Program.Log("Running script");
         if (Commands == null) return;
         foreach (var cmd in Commands)
         {
             if (Wait) cmd.Run();
             else new Thread(cmd.Run).Start();
         }
+        Program.Log("Script finished");
     }
 }

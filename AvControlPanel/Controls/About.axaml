@@ -11,7 +11,7 @@
     <Panel>
       <StackPanel>
         <Label Name="DeviceCpanelLabel" Classes="H1">Juhtpaneel</Label>
-        <Label Name="CpanelVersionLabel" Content="{Binding EditionInfo.CpanelVersion}">
+        <Label Name="CpanelVersionLabel" Content="{Binding EditionInfo.CpanelVersionLong}">
           <ToolTip.Tip>
             <TextBlock>
               Programmi versioon.<LineBreak/>
@@ -23,7 +23,6 @@
             </TextBlock>
           </ToolTip.Tip>
         </Label>
-        <Label Margin="0,10,0,0">kasutab Avalonia UI raamistikku</Label>
         <Label Content="{Binding Copyright}"></Label>
         <Panel Margin="0,10">
           <StackPanel>

@@ -87,6 +87,7 @@ public partial class Edition
         Name = lines[10];
         if (lines.Length < 12) return;
         Hash = lines[11];
+        Program.Log("Loaded edition info");
     }
     
     // Avalonia specific stuff
@@ -116,7 +117,10 @@ public partial class Edition
         });
     
     [JsonIgnore]
-    public static string CpanelVersion => "versioon " + (Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.0");
+    public static string CpanelVersion => (Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.0");
+    
+    [JsonIgnore]
+    public static string CpanelVersionLong => "versioon " + (Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "0.0") + "\nkuupäev: " + Program.GetAssemblyBuildDateTime();
 
     [JsonIgnore]
     public string DeviceDescription => BuildNo[^1] switch
@@ -127,14 +131,23 @@ public partial class Edition
         _ => "Markuse asjad muudele seadmetele"
     };
 
+    [JsonIgnore]
     public Bitmap FeatMm => GenerateMark(Features?.Contains("MM"));
+    [JsonIgnore]
     public Bitmap FeatIp => GenerateMark(Features?.Contains("IP"));
+    [JsonIgnore]
     public Bitmap FeatTs => GenerateMark(Features?.Contains("TS"));
+    [JsonIgnore]
     public Bitmap FeatRm => GenerateMark(Features?.Contains("RM"));
+    [JsonIgnore]
     public Bitmap FeatCs => GenerateMark(Features?.Contains("CS"));
+    [JsonIgnore]
     public Bitmap FeatRd => GenerateMark(Features?.Contains("RD"));
+    [JsonIgnore]
     public Bitmap FeatWx => GenerateMark(Features?.Contains("WX"));
+    [JsonIgnore]
     public Bitmap FeatLt => GenerateMark(Features?.Contains("LT"));
+    [JsonIgnore]
     public Bitmap FeatGp => GenerateMark(Features?.Contains("GP"));
 
     private static Bitmap GenerateMark(bool? value)

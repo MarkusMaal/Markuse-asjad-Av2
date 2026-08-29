@@ -1,5 +1,7 @@
+using System;
 using System.IO;
 using Avalonia.Media;
+using AvControlPanel.Models.Desktop;
 
 namespace AvControlPanel.Models;
 
@@ -21,6 +23,7 @@ public class Scheme
         ForegroundColor = Color.FromArgb(255, byte.Parse(strArray3[0]), byte.Parse(strArray3[1]), byte.Parse(strArray3[2]));
         textReader.Close();
         textReader.Dispose();
+        Program.Log("Loaded color scheme");
     }
 
     public void SaveScheme(string masRoot)
@@ -29,5 +32,12 @@ public class Scheme
         text.Write($"{BackgroundColor.R}:{BackgroundColor.G}:{BackgroundColor.B}:;{ForegroundColor.R}:{ForegroundColor.G}:{ForegroundColor.B}:;");
         text.Close();
         text.Dispose();
+        Program.Log("Saved color scheme");
+        
+        if (!File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config",
+                "eww",
+                "eww.scss"))) return;
+        var eww = new EwwYuck();
+        eww.ColorSync(BackgroundColor);
     }
 }

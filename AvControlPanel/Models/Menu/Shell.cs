@@ -60,6 +60,7 @@ public class Shell
             args = actualArgs;
         }
 
+        Program.Log($"Running shell command: '{cmd}' with arguments '{args}'");
         var p = new Process
         {
             StartInfo = new ProcessStartInfo

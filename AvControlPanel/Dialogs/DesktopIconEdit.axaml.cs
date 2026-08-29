@@ -53,9 +53,9 @@ public partial class DesktopIconEdit : Window
                 LocationBox.Text = Uri.UnescapeDataString(files[0].Path.AbsolutePath);
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // TODO: logging
+            Program.Log($"Browser function error: {ex.Message}");
         }
     }
 

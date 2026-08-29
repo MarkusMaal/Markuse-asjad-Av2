@@ -71,15 +71,18 @@ public partial class Desktop : UserControl
         try
         {
             File.WriteAllText(App.MasRoot + "/DesktopIcons.json", jsonData, encoding: Encoding.UTF8);
+            Program.Log("Saved desktop configuration");
         }
-        catch
+        catch (Exception ex)
         {
+            Program.Log($"Failed to save desktop configuration: {ex.Message}");
             mw.MessageBoxShow("Sätete salvestamine nurjus. Olge kindlad, et teil oleks kirjutamise ligipääs failile \"DesktopIcons.json\".", "Markuse arvuti juhtpaneel", ButtonEnum.Ok, Icon.Error);
         }
     }
 
     private void DesktopJSONEditButton_OnClick(object? sender, RoutedEventArgs e)
     {
+        Program.Log("Opened desktop configuration JSON file");
         var p = new Process
         {
             StartInfo =
@@ -97,6 +100,7 @@ public partial class Desktop : UserControl
         {
             if (process.ProcessName.StartsWith("DesktopIcons"))
             {
+                Program.Log("Killed DesktopIcons process");
                 process.Kill();
             }
         }
@@ -119,6 +123,7 @@ public partial class Desktop : UserControl
             p.StartInfo.FileName = "bash";
         }
         p.Start();
+        Program.Log("Restarted DesktopIcons process");
     }
 
     private void DesktopIconsResetDefaults_OnClick(object? sender, RoutedEventArgs e)
@@ -126,10 +131,12 @@ public partial class Desktop : UserControl
         if (File.Exists(App.MasRoot + "/DesktopIcons.json"))
         {
             File.Delete(App.MasRoot + "/DesktopIcons.json");
+            Program.Log("Deleted DesktopIcons JSON file");
         }
         if (File.Exists(App.MasRoot + "/DesktopIconsCommand.json"))
         {
             File.Delete(App.MasRoot + "/DesktopIconsCommand.json");
+            Program.Log("Deleted DesktopIconsCommand JSON file");
         }
 
         DesktopIconsRestart_OnClick(sender, e);

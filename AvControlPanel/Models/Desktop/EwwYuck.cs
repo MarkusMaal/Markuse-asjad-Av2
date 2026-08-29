@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Avalonia.Media;
 
 namespace AvControlPanel.Models.Desktop;
 
@@ -10,6 +11,8 @@ public class EwwYuck
     public List<DesktopEntry> Entries { get; set; } = [];
     private readonly string _cfgPath = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "eww",
         "eww.yuck");
+    private readonly string _stylePath = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "eww",
+        "eww.scss");
     
     public void LoadConfig()
     {
@@ -38,6 +41,7 @@ public class EwwYuck
                 });
             }
         }
+        Program.Log($"Loaded eww configuration");
     }
 
     public void SaveConfig()
@@ -71,5 +75,37 @@ public class EwwYuck
 
         writer.Close();
         writer.Dispose();
+        Program.Log($"Saved eww configuration");
+    }
+
+    public void ColorSync(Color background)
+    {
+        if (!File.Exists(_stylePath)) return;
+        Program.Log($"Syncing color changes for eww");
+        var outputText = "";   
+        var reader = File.OpenText(_stylePath);
+        var previousLine = "";
+        var rp = Math.Round(background.R / 255.0 * 100.0, 0);
+        var gp = Math.Round(background.G / 255.0 * 100.0, 0);
+        var bp = Math.Round(background.B / 255.0 * 100.0, 0);
+        while (!reader.EndOfStream)
+        {
+            var line = reader.ReadLine() ?? "";
+            if (previousLine.StartsWith(".icon {"))
+            {
+                line = $"    background-color: rgba({rp}%, {gp}%, {bp}%,0.7);";
+            }
+            else if (previousLine.EndsWith("opacity: 0.7;"))
+            {
+                line = $"    background-color: rgba({rp}%, {gp}%, {bp}%, 0.5);";
+            }
+
+            outputText += line + "\n";
+            previousLine = line;
+        }
+        reader.Close();
+        var writer = File.CreateText(_stylePath);
+        writer.Write(outputText);
+        writer.Close();
     }
 }

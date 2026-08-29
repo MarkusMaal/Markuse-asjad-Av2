@@ -37,6 +37,7 @@ public class ScriptMenu
             }
             MenuItems.Add(new MenuItem() {Script = script, Title = title, Tooltip = tooltip});
         }
+        Program.Log("Script menu loaded and validated");
     }
 
     public MenuItem[] GetMenuItems()

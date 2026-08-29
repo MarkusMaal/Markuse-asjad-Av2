@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Avalonia.Controls;
+using Avalonia.DesignerSupport.Remote;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
@@ -13,6 +14,7 @@ using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
 using AvControlPanel.Models;
+using AvControlPanel.Models.Desktop;
 using AvControlPanel.Models.MarkuStation;
 using AvControlPanel.Models.Menu;
 using MasCommon;
@@ -26,11 +28,16 @@ public partial class MainWindow : Window
     public readonly Scheme Scheme = new();
     public MainWindow()
     {
+        Program.Log("Initializing main window");
         InitializeComponent();
     }
 
     private void Control_OnLoaded(object? sender, RoutedEventArgs e)
     {
+        Program.InitStopwatch.Stop();
+        Program.Log($"Initialization completed in {Program.InitStopwatch.ElapsedMilliseconds} ms");
+        Program.InitStopwatch = new Stopwatch();
+        Program.InitStopwatch.Start();
         new Thread(Loading).Start();
     }
     // Reimplementation of WinForms MessageBox.Show
@@ -49,6 +56,9 @@ public partial class MainWindow : Window
 
     internal void Reload()
     {
+        Program.Log("Reloading data now");
+        Program.InitStopwatch = new Stopwatch();
+        Program.InitStopwatch.Start();
         CheckSysLabel.IsVisible = true;
         LogoPanel.IsVisible = false;
         MainTabControl.IsVisible = false;
@@ -59,6 +69,7 @@ public partial class MainWindow : Window
 
     private void StopError(string status)
     {
+        Program.Log($"Fatal error has occurred: {status}");
         CollectProgress.Value = 0;
         LoaderLogo.IsVisible = false;
         FailGif.IsVisible = true;
@@ -88,11 +99,17 @@ public partial class MainWindow : Window
 
     private void Loading()
     {
+        if (Design.IsDesignMode)
+        {
+            goto DesignerSkip;
+        }
         if (!Verifile.CheckVerifileTamper())
         {
+            Program.Log("Verifile tamper check failed");
             Dispatcher.UIThread.Post(() => StopError("Püsivuskontroll ei ole usaldusväärne, sest Verifile 2.0 räsi ei ole sobiv. Palun uuendage juhtpaneeli ja/või Verifile 2.0 tarkvara kataloogis\n\"" + App.MasRoot + "\". Täpsem info standardväljundis."));
             return;
         }
+        Program.Log("Verifile tamper check passed");
         Dispatcher.UIThread.Post(() => DisplayLoadMessage("Värviskeemi laadimine", 12));
         Scheme.LoadScheme(App.MasRoot);
         Dispatcher.UIThread.Post(() =>
@@ -103,12 +120,14 @@ public partial class MainWindow : Window
         if (File.Exists(App.MasRoot + "/irunning.log"))
         {
             Dispatcher.UIThread.Post(() => WindowState = WindowState.FullScreen);
+            Program.Log("ITS is running, starting in fullscreen");
         }
         Dispatcher.UIThread.Post(() => DisplayLoadMessage("Verifile püsivuskontrolli sooritamine", 24));
         Program.MakeAttestation();
         switch (Program.Status)
         {
             case "VERIFIED":
+                Program.Log("Verifile integrity check passed");
                 break;
             case "FOREIGN":
                 Dispatcher.UIThread.Post(() => StopError("See programm töötab ainult Markuse arvutis.\nVeakood: VF_FOREIGN"));
@@ -128,9 +147,11 @@ public partial class MainWindow : Window
         }
         if (!Verifile.CheckFiles(Verifile.FileScope.ControlPanel) || !File.Exists(Path.Join(App.MasRoot, "Config.json")))
         {
+            Program.Log("File checks failed");
             Dispatcher.UIThread.Post(() => StopError("Markuse asjade tarkvara ei ole õigesti juurutatud. Palun juurutage seade kasutades juurutamise tööriista."));
             return;
         }
+        Program.Log("File checks passed");
         Dispatcher.UIThread.Post(() => DisplayLoadMessage("MarkuStationi konfiguratsiooni laadimine", 36));
         Config? cfg = null;
         if (File.Exists(Path.Join(App.MasRoot, "ms_games.txt")) && File.Exists(Path.Join(App.MasRoot, "ms_exec.txt")) &&
@@ -143,6 +164,7 @@ public partial class MainWindow : Window
         Dispatcher.UIThread.Post(() => DisplayLoadMessage("Üldise konfiguratsiooni laadimine", 48));
         var commonConfig = new CommonConfig();
         commonConfig.Load(App.MasRoot);
+        Program.Log("Common configuration loaded");
         var edition = new Edition();
         Dispatcher.UIThread.Post(() => DisplayLoadMessage("Skriptimenüü analüüsimine", 60));
         ScriptMenu? scriptMenu = null;
@@ -156,11 +178,15 @@ public partial class MainWindow : Window
         }
 
         Dispatcher.UIThread.Post(() => DisplayLoadMessage("Taustapiltide laadimine", 72));
+        Program.Log("Loading desktop background");
         var bitmapDesktop = new Bitmap(Path.Combine(App.MasRoot, "bg_desktop.png"));
+        Program.Log("Loading login screen background");
         var bitmapLogin = new Bitmap(Path.Combine(App.MasRoot, "bg_login.png"));
+        Program.Log("Loading uncommon background");
         var bitmapUncommon = new Bitmap(Path.Combine(App.MasRoot, "bg_uncommon.png"));
         
         Dispatcher.UIThread.Post(() => DisplayLoadMessage("Töölauaikoonide avastamine", 84));
+        Program.Log("Getting available desktop icons");
         var proc = new Process
         {
             StartInfo = new ProcessStartInfo
@@ -179,10 +205,23 @@ public partial class MainWindow : Window
         {
             var line = proc.StandardOutput.ReadLine();
             if (string.IsNullOrEmpty(line)) continue;
+            Program.Log($"Detected icon: {line}");
             Program.AvailableIcons.Add(line);
         }
         Dispatcher.UIThread.Post(() => DisplayLoadMessage("Töölauaikoonide konfiguratsiooni laadimine", 96));
-        if (File.Exists(Path.Combine(App.MasRoot, "DesktopIcons.json")))
+        if (File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "eww",
+                "eww.yuck")))
+        {
+            var ewwLayout = new EwwYuck();
+            ewwLayout.LoadConfig();
+            Dispatcher.UIThread.Post(() =>
+            {
+                DesktopEwwTab.IsVisible = true;
+                DesktopTab.IsVisible = false;
+                DesktopEwwPanel.Yuck = ewwLayout;
+            });
+        }
+        else if (File.Exists(Path.Combine(App.MasRoot, "DesktopIcons.json")))
         {
             var desktopLayoutReader = File.OpenText(Path.Combine(App.MasRoot, "DesktopIcons.json"));
             var json = desktopLayoutReader.ReadToEnd();
@@ -193,6 +232,7 @@ public partial class MainWindow : Window
                 Dispatcher.UIThread.Post(() =>
                     DesktopPanel.DesktopLayoutObject = dl);
             }
+            Program.Log("Loaded desktop configuration");
         }
         else
         {
@@ -200,6 +240,7 @@ public partial class MainWindow : Window
         }
 
         Dispatcher.UIThread.Post(() => DisplayLoadMessage("Kasutajaliidese ettevalmistamine", 100));
+        Program.Log("Displaying user interface");
         Dispatcher.UIThread.Post(() =>
         {
             RootGrid.Background = new ImageBrush(new Bitmap(Path.Join(App.MasRoot, "bg_common.png")))
@@ -229,7 +270,13 @@ public partial class MainWindow : Window
             ConfigurationPanel.MasCommonConfig = commonConfig;
             ConfigurationPanel.DesktopBackground = bitmapDesktop;
             ConfigurationPanel.LoginBackground = bitmapLogin;
-            ConfigurationPanel.UncommonBackground = bitmapUncommon;
+            ConfigurationPanel.UncommonBackground = bitmapUncommon; 
+        });
+        Program.InitStopwatch.Stop();
+        Program.Log($"Data colletion finished in {Program.InitStopwatch.ElapsedMilliseconds} ms");
+DesignerSkip:
+        Dispatcher.UIThread.Post(() =>
+        {
             CheckSysLabel.IsVisible = false;
             LogoPanel.IsVisible = true;
             MainTabControl.IsVisible = true;
@@ -256,11 +303,10 @@ public partial class MainWindow : Window
                 _ => MainTabControl.SelectedIndex
             };
         }
-        if (e.Key is Key.LeftAlt or Key.RightAlt)
-        {
-            TipLabel.IsVisible = true;
-            CloseButton.IsVisible = false;
-        }
+
+        if (e.Key is not (Key.LeftAlt or Key.RightAlt)) return;
+        TipLabel.IsVisible = true;
+        CloseButton.IsVisible = false;
     }
 
     private void InputElement_OnPointerMoved(object? sender, PointerEventArgs e)
@@ -321,14 +367,17 @@ public partial class MainWindow : Window
 
     private bool DoWeSkipTab()
     {
-        return ((MainTabControl.SelectedIndex == 1) && !File.Exists(Path.Combine(App.MasRoot, "Markuse asjad",
-                   "MarkuStation2" + (OperatingSystem.IsWindows() ? ".exe" : "")))) ||
-               ((MainTabControl.SelectedIndex == 3) &&
-                !File.ReadAllText(Path.Combine(App.MasRoot, "edition.txt")).Contains("TS"));
+        if (MainTabControl.SelectedItem is not TabItem ti) return false;
+        return !ti.IsVisible;
     }
 
     private void CloseButton_OnClick(object? sender, RoutedEventArgs e)
     {
         Close();
+    }
+
+    private void Window_OnClosing(object? sender, WindowClosingEventArgs e)
+    {
+        Program.Log("Closing application");
     }
 }

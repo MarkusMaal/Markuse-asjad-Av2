@@ -35,6 +35,7 @@ public partial class About : UserControl
 
     private void ComputerInfoClicked(object? sender, RoutedEventArgs e)
     {
+        Program.Log($"Opening computer information");
         if (OperatingSystem.IsWindows())
         {
             Process.Start("msinfo32");
@@ -54,6 +55,7 @@ public partial class About : UserControl
             UseShellExecute = true,
         };
         p.Start();
+        Program.Log($"Opening '{App.MasRoot}'");
     }
 
     private void Reload_OnClick(object? sender, RoutedEventArgs e)

@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="AvControlPanel.Controls.DesktopEww" DataContext="{Binding RelativeSource={RelativeSource Self}}">
+    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+        <TableView Name="YuckTable" ItemsSource="{Binding Yuck.Entries}" SelectionChanged="SelectingItemsControl_OnSelectionChanged">
+            <TableView.Columns>
+                <TableViewColumn Header="Nimi" Binding="{Binding Tooltip}"></TableViewColumn>
+                <TableViewColumn Header="Ikoon" Binding="{Binding Image}"></TableViewColumn>
+                <TableViewColumn Header="Programm" Binding="{Binding Executable}"></TableViewColumn>
+            </TableView.Columns>
+        </TableView>
+        <Grid Name="EditGrid" Grid.Column="1" RowDefinitions="Auto,Auto,*" IsEnabled="False">
+            <Label Grid.Row="0" Classes="H1">Muuda üksust</Label>
+            <Grid Grid.Row="1"  ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                <Label VerticalAlignment="Center">Nimi</Label>
+                <TextBox Name="NameBox" Grid.Row="0" Grid.Column="1" TextChanged="NameBox_OnTextChanged"></TextBox>
+                <Label Grid.Row="1" Grid.Column="0" VerticalAlignment="Center">Ikoon</Label>
+                <TextBox Name="IconBox" Grid.Row="1" Grid.Column="1" TextChanged="NameBox_OnTextChanged"></TextBox>
+                <Label Grid.Row="2" Grid.Column="0" VerticalAlignment="Center">Käivitatav programm</Label>
+                <TextBox Name="ExecBox" Grid.Row="2" Grid.Column="1" TextChanged="NameBox_OnTextChanged"></TextBox>
+                <Button Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right" Click="EditButton_OnClick">Muuda</Button>
+            </Grid>
+            <Image Width="128" Grid.Row="2" Name="IconPreview"></Image>
+        </Grid>
+    </Grid>
+</UserControl>

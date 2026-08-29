@@ -57,6 +57,7 @@ public class Config
         });
         monitor.Close();
         monitor.Dispose();
+        Program.Log("Saved MarkuStation configuration");
     }
     
     public void LoadConfig()
@@ -106,26 +107,11 @@ public class Config
                 Name = gameNames[i],
             });
         }
+        Program.Log("Loaded MarkuStation configuration");
     }
 
     public Game[] GetGames()
     {
         return [.. Games];
-    }
-
-    public void EditGame(int idx, string name, string location)
-    {
-        Games[idx].Name = name;
-        Games[idx].Executable = location;
-    }
-
-    public void AddGame(Game game)
-    {
-        Games.Add(game);
-    }
-
-    public void DeleteGame(int idx)
-    {
-        Games.RemoveAt(idx);
     }
 }

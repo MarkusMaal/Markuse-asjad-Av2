@@ -30,4 +30,7 @@
     <ItemGroup>
         <ProjectReference Include="..\MasCommon\MasCommon.csproj" />
     </ItemGroup>
+    <ItemGroup>
+        <AssemblyMetadata Include="BuildDateTime" Value="$([System.DateTime]::Now.ToString('s'))" />
+    </ItemGroup>
 </Project>

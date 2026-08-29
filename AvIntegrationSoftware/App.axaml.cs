@@ -256,6 +256,11 @@ public class App : Application
         while (!_shutdownNow)
         {
             if (_featureTripped) return;
+            if (File.Exists(Path.Combine(Path.GetTempPath(), "eww_double_click.lock")))
+            {
+                File.Delete(Path.Combine(Path.GetTempPath(), "eww_double_click.lock"));
+                Program.Log("Deleted double-click lock");
+            }
             if (Scheme == null)
             {
                 Thread.Sleep(100);

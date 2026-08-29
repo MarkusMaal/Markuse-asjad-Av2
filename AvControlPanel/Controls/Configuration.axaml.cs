@@ -62,9 +62,11 @@ public partial class Configuration : UserControl
         {
             File.WriteAllText(Path.Join(App.MasRoot, "mas.cnf"), saveprog);
             MasCommonConfig.Save(App.MasRoot);
+            Program.Log("Saved common configuration");
         }
-        catch
+        catch (Exception ex)
         {
+            Program.Log($"Failed to save common configuration: {ex.Message}");
             ConfigNoticeLabel.Content = "Neid sätteid ei saa hetkel muuta. Olge kindlad, et kirjutamise ligipääs failidele mas.cnf ja Config.json oleks saadaval.";
         }
     }
@@ -148,9 +150,9 @@ public partial class Configuration : UserControl
                 }
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // TODO: logging
+            Program.Log($"Change desktop function error: {ex.Message}");
         }
     }
 
@@ -179,9 +181,9 @@ public partial class Configuration : UserControl
                 ThumbLockscreen.Source = new Bitmap(App.MasRoot + "/bg_login.png");
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // TODO: logging
+            Program.Log($"ChangeLogin function error: {ex.Message}");
         }
     }
 
@@ -210,9 +212,9 @@ public partial class Configuration : UserControl
                 ThumbMiniversion.Source = new Bitmap(App.MasRoot + "/bg_uncommon.png");
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // TODO: logging
+            Program.Log($"ChangeMini function error: {ex.Message}");
         }
     }
 

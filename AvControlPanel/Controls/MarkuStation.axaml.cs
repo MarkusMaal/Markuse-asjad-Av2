@@ -92,9 +92,9 @@ public partial class MarkuStation : UserControl
                 LocationBox.Text = Uri.UnescapeDataString(files[0].Path.AbsolutePath);
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // TODO: add logging in future
+            Program.Log($"MarkuStation file browser function error: {ex.Message}");
         }
     }
 
@@ -124,6 +124,7 @@ public partial class MarkuStation : UserControl
         // käivita MarkuStation 2 kui see eksisteerib
         if (File.Exists(App.MasRoot + "/Markuse asjad/MarkuStation2") || File.Exists(App.MasRoot + "/Markuse asjad/MarkuStation2.exe"))
         {
+            Program.Log("Launching MarkuStation 2");
             if (OperatingSystem.IsWindows())
             {
                 Program.StartWin32Process(App.MasRoot + "/Markuse asjad/MarkuStation2.exe");
@@ -137,6 +138,7 @@ public partial class MarkuStation : UserControl
         }
         else
         { // käivita MarkuStation 1 fallback-ina
+            Program.Log("Launching MarkuStation (fallback)");
             Program.StartWin32Process(App.MasRoot + "/MarkuStation.exe");
         }
     }
