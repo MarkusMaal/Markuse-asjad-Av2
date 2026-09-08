@@ -39,14 +39,15 @@ public class App : Application
     private bool _previousBusy = true;
     private TaskScheduler? _taskScheduler;
     private bool _canCloseSplash;
+    private bool VerifileFinished { get; set; }
     
     public override void Initialize()
     {
         _nextCheck = DateTime.Now.Add(_checkInterval);
-        TryRefreshFeatures();
-        _watchers = new Watchers();
         UpdateConfig();
         if (MasConfig.ShowLogo) _splashScreen.Show();
+        TryRefreshFeatures();
+        _watchers = new Watchers();
         if (MasConfig.AutostartNotes)
         {
             if (!File.Exists(Path.Join(MasRoot, "noteopen.txt")))
@@ -155,6 +156,7 @@ public class App : Application
                 if (vfAttestationResult == "VERIFIED")
                 {
                     Program.Log("Initial Verifile checks passed");
+                    VerifileFinished = true;
                 }
             }).Start();
             
@@ -171,8 +173,9 @@ public class App : Application
         if (!_splashScreen.IsVisible) return;
         new Thread(() =>
         {
-            while (!_canCloseSplash)
+            while (!_canCloseSplash || !VerifileFinished)
             {
+                if (_featureTripped) break;
                 Thread.Sleep(500);
             }
             Dispatcher.UIThread.Post(() =>
