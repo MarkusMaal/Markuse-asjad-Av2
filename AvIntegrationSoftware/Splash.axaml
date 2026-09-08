@@ -4,17 +4,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         x:Class="AvIntegrationSoftware.Splash"
-        Title="Splash"
-        Topmost="True"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaTitleBarHeightHint="-1"
-        WindowDecorations="BorderOnly"
+        WindowDecorations="BorderOnly" Topmost="True"
         TransparencyLevelHint="Transparent"
         Background="Transparent" Closing="Splash_OnClosing"
         IsHitTestVisible="True" CanResize="False" BorderThickness="0"
         Width="400" Height="245" WindowStartupLocation="CenterScreen"
         BorderBrush="Transparent" WindowState="Normal" ShowInTaskbar="False"
-        Foreground="White"
+        Foreground="White" Cursor="Wait"
         Icon="Assets/mas_integration.png" DataContext="{Binding RelativeSource={RelativeSource Self}}">
     <Grid RowDefinitions="*,Auto,30">
         <Rectangle Grid.Row="0" Grid.RowSpan="3" Name="Backglass" Fill="#8009" Width="400" Height="245">

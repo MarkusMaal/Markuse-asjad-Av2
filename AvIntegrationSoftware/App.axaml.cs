@@ -38,6 +38,7 @@ public class App : Application
     private static Watchers? _watchers; // this line must NOT be removed, otherwise M.A.I.A. integration will not work
     private bool _previousBusy = true;
     private TaskScheduler? _taskScheduler;
+    private bool _canCloseSplash;
     
     public override void Initialize()
     {
@@ -121,51 +122,42 @@ public class App : Application
 
             desktop.ShutdownMode = ShutdownMode.OnLastWindowClose;
 
-            var vff = new VerifileFail();
-            if (!Verifile.CheckVerifileTamper())
+            // lazy load for verifile checks
+            new Thread(() =>
             {
-                vff.InfoTextBlock.Text = $"Verifile 2.x räsi ei ole usaldusväärne. Uuendage integratsiooniprogrammi ja/või asendage fail \"{Path.Join(MasRoot, "verifile2.jar")}\" uuema/ühilduva versiooniga.";
-                vff.Show();
-                if (_splashScreen.IsVisible) _splashScreen.Close();
-                return;
-            }
+                var hashOk = Verifile.CheckVerifileTamper();
+                Dispatcher.UIThread.Post(() =>
+                {
+                    if (hashOk) return;
+                    TripVerifile($"Verifile 2.x räsi ei ole usaldusväärne. Uuendage integratsiooniprogrammi ja/või asendage fail \"{Path.Join(MasRoot, "verifile2.jar")}\" uuema/ühilduva versiooniga.", true);
+                    if (_splashScreen.IsVisible) _splashScreen.Close();
+                });
+                if (!hashOk) return;
 
-            var vfAttestationResult = _vf.MakeAttestation();
-            switch (vfAttestationResult)
-            {
-                case "VERIFIED":
-                    desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
-                    break;
-                case "FAILED":
-                    vff.InfoTextBlock.Text += "\n\nVeakood: VF_FAILED";
-                    vff.Show();
-                    break;
-                case "BYPASS":
-                    vff.InfoTextBlock.Text += "\n\nVeakood: VF_BYPASS";
-                    vff.Show();
-                    break;
-                case "LEGACY":
-                    vff.InfoTextBlock.Text += "\n\nVeakood: VF_LEGACY";
-                    vff.Show();
-                    break;
-                case "TAMPERED":
-                    vff.InfoTextBlock.Text += "\n\nVeakood: VF_TAMPERED";
-                    vff.Show();
-                    break;
-                case "FOREIGN":
-                    vff.InfoTextBlock.Text += "\n\nVeakood: VF_FOREIGN";
-                    vff.Show();
-                    break;
-            }
+                var vfAttestationResult = _vf.MakeAttestation();
+                var vfFileCheck = Verifile.CheckFiles(Verifile.FileScope.IntegrationSoftware);
+                Dispatcher.UIThread.Post(() =>
+                {
+                    if (vfAttestationResult != "VERIFIED" && vfAttestationResult != "BYPASS")
+                    {
+                        TripVerifile("VF_" + vfAttestationResult);
+                    }
+                    else
+                    {
+                        desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
+                    }
+                    if (vfAttestationResult != "VERIFIED" && _splashScreen.IsVisible) _splashScreen.Close();
+                    if (vfAttestationResult != "VERIFIED" || vfFileCheck) return;
+                    TripVerifile("VF_MISSING_FILES");
+                    desktop.ShutdownMode = ShutdownMode.OnLastWindowClose;
+                });
 
-            if (vfAttestationResult != "VERIFIED" && _splashScreen.IsVisible) _splashScreen.Close();
-            if (vfAttestationResult == "VERIFIED" && !Verifile.CheckFiles(Verifile.FileScope.IntegrationSoftware))
-            {
-                vff.InfoTextBlock.Text += "\n\nVeakood: VF_MISSING_FILES";
-                vff.Show();
-            }
-            if (vfAttestationResult != "VERIFIED") return;
-
+                if (vfAttestationResult == "VERIFIED")
+                {
+                    Program.Log("Initial Verifile checks passed");
+                }
+            }).Start();
+            
             desktop.ShutdownRequested += (_, _) =>
             {
                 _shutdownNow = true;
@@ -176,11 +168,38 @@ public class App : Application
         new Thread(MenuUpdateThread).Start();
         
         base.OnFrameworkInitializationCompleted();
+        if (!_splashScreen.IsVisible) return;
         new Thread(() =>
         {
-            Thread.Sleep(_pollRate);
-            Dispatcher.UIThread.Post(() => _splashScreen.Close());
+            while (!_canCloseSplash)
+            {
+                Thread.Sleep(500);
+            }
+            Dispatcher.UIThread.Post(() =>
+            {
+                _splashScreen.Close();
+                ToggleBusy(false);
+            });
         }).Start();
+    }
+
+    private void TripVerifile(string message, bool forceClose = false)
+    {
+        var vff = new VerifileFail();
+        _featureTripped = true;
+        TrayIcon.GetIcons(this)?.First().Menu?.Items.Clear();
+        TrayIcon.GetIcons(this)?.First().IsVisible = false;
+        if (forceClose)
+        {
+            vff.InfoTextBlock.Text = message;
+        }
+        else
+        {
+            vff.InfoTextBlock.Text += "\n\nVeakood: " + message;
+        }
+
+        vff.ForceClose = forceClose;
+        vff.Show(); 
     }
 
     private void InitTrayMenu(bool reInit = false)
@@ -208,6 +227,13 @@ public class App : Application
                     subItem.PollState();
                     if (subItem.GetState() == null) continue;
                     var submenuRealIconPath = subItem.GetState()!.IconPath.Replace("%MAS_ROOT%", MasRoot);
+                    if (!File.Exists(submenuRealIconPath))
+                    {
+                        if (_splashScreen.IsVisible) _splashScreen.Hide();
+                        Program.Log($"Required file \"{submenuRealIconPath}\" doesn't exist");
+                        TripVerifile($"Menüü kuvamiseks vajalikku faili \"{submenuRealIconPath}\" ei eksisteeri", true);
+                        break;
+                    }
                     subMenu.Items.Add(new NativeMenuItem(subItem.GetState()!.Label)
                     {
                         Command = new MenuCommand(() =>
@@ -238,6 +264,7 @@ public class App : Application
     public void ToggleBusy(bool isBusy)
     {
         if (_previousBusy == isBusy) return;
+        if (TrayIcon.GetIcons(this)?.Count == 0) return;
         var hourGlassStream = AssetLoader.Open(new Uri("avares://AvIntegrationSoftware/Assets/hourglass.png"));
         var logoStream = AssetLoader.Open(new Uri("avares://AvIntegrationSoftware/Assets/mas_integration.png"));
         var hourGlass = new Bitmap(hourGlassStream);
@@ -252,6 +279,7 @@ public class App : Application
 
     private void MenuUpdateThread()
     {
+        if (_pollRate <= 0) _pollRate = 1000;
         Program.Log($"Initialized menu polling with {_pollRate}ms interval");
         while (!_shutdownNow)
         {
@@ -299,6 +327,7 @@ public class App : Application
             Dispatcher.UIThread.Post(() =>
             {
                 if (_splashScreen.IsVisible) return;
+                if (_featureTripped) return;
                 if (!Features.Contains("IP"))
                 {
                     _featureTripped = true;
@@ -366,6 +395,7 @@ public class App : Application
                     }
                 }
             });
+            _canCloseSplash = true;
             Thread.Sleep(_pollRate);
         }
         Program.Log("Shutting down application");
