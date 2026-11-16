@@ -26,7 +26,7 @@ public class App : Application
     private readonly MenuModel _menu = new();
     private TrayIcon? _trayIcon;
     private static int _pollRate = 5000;
-    private bool _shutdownNow;
+    public static bool ShutdownNow;
     private readonly Splash _splashScreen = new();
     public static Color[] Scheme = [];
     private readonly Verifile _vf = new();
@@ -40,10 +40,14 @@ public class App : Application
     private TaskScheduler? _taskScheduler;
     private bool _canCloseSplash;
     private bool VerifileFinished { get; set; }
+    private MasOpenRgbClient? _openRgbClient;
     
     public override void Initialize()
     {
         _nextCheck = DateTime.Now.Add(_checkInterval);
+        TryRefreshFeatures();
+        _watchers = new Watchers();
+        _openRgbClient = new MasOpenRgbClient();
         UpdateConfig();
         if (MasConfig.ShowLogo) _splashScreen.Show();
         TryRefreshFeatures();
@@ -162,7 +166,7 @@ public class App : Application
             
             desktop.ShutdownRequested += (_, _) =>
             {
-                _shutdownNow = true;
+                ShutdownNow = true;
             };
         }
         _menu.Load();
@@ -284,7 +288,7 @@ public class App : Application
     {
         if (_pollRate <= 0) _pollRate = 1000;
         Program.Log($"Initialized menu polling with {_pollRate}ms interval");
-        while (!_shutdownNow)
+        while (!ShutdownNow)
         {
             if (_featureTripped) return;
             if (File.Exists(Path.Combine(Path.GetTempPath(), "eww_double_click.lock")))
@@ -462,6 +466,7 @@ public class App : Application
                     var bgs = bgfg[0].Split(':');
                     var fgs = bgfg[1].Split(':');
                     Color[] cols = [Color.FromArgb(255, byte.Parse(bgs[0]), byte.Parse(bgs[1]), byte.Parse(bgs[2])), Color.FromArgb(255, byte.Parse(fgs[0]), byte.Parse(fgs[1]), byte.Parse(fgs[2]))];
+                    _openRgbClient?.SetSolidColor(byte.Parse(bgs[0]), byte.Parse(bgs[1]), byte.Parse(bgs[2]));
                     Scheme = cols;
                     Dispatcher.UIThread.Post(() =>
                     {
