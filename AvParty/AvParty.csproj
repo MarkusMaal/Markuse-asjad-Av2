@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <TrimMode>partial</TrimMode>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <ApplicationIcon>pidu.ico</ApplicationIcon>
+        <AssemblyVersion>3.0.0.0</AssemblyVersion>
+        <PublishAot>true</PublishAot>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Avalonia" Version="12.0.1"/>
+        <PackageReference Include="Avalonia.Desktop" Version="12.0.1"/>
+        <PackageReference Include="Avalonia.Themes.Simple" Version="12.0.1" />
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="12.0.1"/>
+        <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.3">
+            <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+            <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="SFML.Audio" Version="3.0.0" />
+        <PackageReference Include="TagLibSharp" Version="2.3.0" />
+        <PackageReference Include="MessageBox.Avalonia" Version="12.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Resources\" />
+    </ItemGroup>
+    <ItemGroup>
+        <None Remove="Resources\Goa-Party.jpg" />
+        <None Remove="Resources\Party-Wallpapers.jpg" />
+        <None Remove="Resources\Party-Wallpapers_small.jpg" />
+    </ItemGroup>
+    <ItemGroup>
+        <AvaloniaResource Include="Resources\Goa-Party.jpg" />
+        <AvaloniaResource Include="Resources\Party-Wallpapers.jpg" />
+        <AvaloniaResource Include="Resources\Party-Wallpapers_small.jpg" />
+    </ItemGroup>
+    <ItemGroup>
+        <Content Include="pidu.ico" />
+    </ItemGroup>
+</Project>
