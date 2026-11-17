@@ -39,16 +39,21 @@ public partial class MainWindow : Window
         // prevent window borders from being rendered if not in a Linux DE
         if (!OperatingSystem.IsLinux())
         {
-            //Console.WriteLine("Windows/Mac paranduste aktiveerimine...");
+            Program.Log("Activating Windows/Mac fixes");
             ExtendClientAreaToDecorationsHint = false;
             WindowDecorations = WindowDecorations.None;
         }
         _timer.Tick += (_, _) =>
             {
-                /*if ((this.WindowState != WindowState.Minimized) && (this.WindowState == WindowState.Normal))
+                if (!Program.StreamMode)
                 {
-                    this.WindowState = WindowState.FullScreen;
-                }*/
+                    if ((this.WindowState != WindowState.Minimized) && (this.WindowState == WindowState.Normal))
+                    {
+                        Program.Log("Forcing fullscreen mode");
+                        this.WindowState = WindowState.FullScreen;
+                    }
+                }
+                if (_mp == null) goto status;
 
                 if (_mp?.Status == SoundStatus.Stopped)
                 {
@@ -78,6 +83,7 @@ public partial class MainWindow : Window
                     PausePlay.Background = new SolidColorBrush(Colors.Lime);
                 }
 
+                status:
                 var vol = (int?)_mp?.Volume ?? 100;
                 StatusLabel.Content =
                     $"{DateTime.Now}  |  {vol}%  |  {NiceTime(_mp?.PlayingOffset.AsMilliseconds())} / {NiceTime(_mp?.Duration.AsMilliseconds())}";
@@ -87,6 +93,7 @@ public partial class MainWindow : Window
             };
             _volume.Tick += (_, _) =>
             {
+                if (_mp == null) return;
                 if (_mp?.Duration.AsMilliseconds() < 30000)
                 {
                     _mp.Volume = 100;
@@ -152,12 +159,14 @@ public partial class MainWindow : Window
             MinimizeButton.BorderThickness = new Thickness(0);
             Width = 1280;
             Height = 1024;
-            Title = "Pidu!";
+            Title = "Pidu! (voogedastuse režiim)";
             CloseButton.IsVisible = false;
+            Program.Log("Applied stream mode patches");
             return;
         }
         if (!OperatingSystem.IsMacOS() || Program.StreamMode) return;
         new Thread(() => {
+            Program.Log("Running macOS hacks");
             Thread.Sleep(1000);
             Dispatcher.UIThread.Post(() => {
                 WindowState = WindowState.Normal;
@@ -173,6 +182,7 @@ public partial class MainWindow : Window
         if (Program.StreamMode) return;
         if (Width / Height > 3.0)
         {
+            Program.Log("Activating super-ultrawide mode");
             var padding = Width / 4;
             MainGrid.Margin = new Thickness(padding, 0, padding, 0);
         }
@@ -201,16 +211,32 @@ public partial class MainWindow : Window
         _fileName = _playlist[_track];
         _custMessage = false;
         _mp?.Dispose();
-        _mp = new Music(_playlist[_track]);
-        _mp.Play();
-        if (Playlist.IsVisible)
+        _mp = null;
+        try
         {
-            Playlist.SelectedIndex = _track;
+            _mp = new Music(_playlist[_track]);
+            _mp.Play();
+            if (Playlist.IsVisible)
+            {
+                Playlist.SelectedIndex = _track;
+            }
+            Program.Log($"Successfully loaded {new FileInfo(_playlist[_track]).Name}");
+        } catch (LoadingFailedException)
+        {
+            Program.Log($"Error loading {new FileInfo(_playlist[_track]).Name}");
+            BigTitle.Content = $"Ei saa esitada: {Path.GetFileNameWithoutExtension(_playlist[_track])}";
+            new Thread(() =>
+            {
+                Thread.Sleep(5000);
+
+                Dispatcher.UIThread.Post(() => NextTrack_Click(null, null));
+            }).Start();
         }
     }
 
     private void ToggleFade(object? sender, RoutedEventArgs e)
     {
+        Program.Log($"Turned sound fading " + (_volume.IsEnabled ? "on" : "off"));
         _volume.IsEnabled = !_volume.IsEnabled;
         VolumeControl.IsEnabled = true;
         var me = (Button?)sender;
@@ -249,6 +275,7 @@ public partial class MainWindow : Window
                 {
                     _playlist[oldSongs.Length + i] = Uri.UnescapeDataString(files[i].Path.AbsolutePath);
                 }
+                Program.Log($"Added track to existing playlist");
             }
             else
             {
@@ -258,10 +285,12 @@ public partial class MainWindow : Window
                     _playlist[i] = Uri.UnescapeDataString(files[i].Path.AbsolutePath);
                 }
                 _track = 0;
+                Program.Log($"Created playlist, playing first track");
                 PlayTrack();
             }
 
             if (!Playlist.IsVisible) return;
+            Program.Log($"Running a hack to update the playlist display");
             Playlist.Items.Clear();
             foreach (var song in _playlist)
             {
@@ -277,17 +306,21 @@ public partial class MainWindow : Window
 
     private void ClearPlaylist_Click(object? sender, RoutedEventArgs e)
     {
+        Program.Log($"Stopping media playback");
         _mp?.Stop();
         _mp?.Dispose();
+        _mp = null;
         _isPlaying = false;
         BigTitle.Content = _idleString;
-        _playlist = [];
+        Program.Log($"Deleting playlist");
+        _playlist = null;
         Playlist.Items.Clear();
         _track = 0;
     }
 
-    private void NextTrack_Click(object? sender, RoutedEventArgs e)
+    private void NextTrack_Click(object? sender, RoutedEventArgs? e)
     {
+        Program.Log($"Requesting next track to play");
         _mp?.Stop();
         _track++;
         PlayTrack();
@@ -295,6 +328,7 @@ public partial class MainWindow : Window
 
     private void LastTrack_Click(object? sender, RoutedEventArgs e)
     {
+        Program.Log($"Requesting previous track to play");
         _mp?.Stop();
         _track--;
         PlayTrack();
@@ -304,9 +338,11 @@ public partial class MainWindow : Window
     {
         if (_mp?.PlayingOffset > Time.FromSeconds(10))
         {
+            Program.Log($"Seeked back 10 seconds");
             _mp?.PlayingOffset -= Time.FromSeconds(10);
         } else
         {
+            Program.Log($"Seeked back to beginning");
             _mp?.PlayingOffset = Time.FromMilliseconds(0);
         }
     }
@@ -315,10 +351,12 @@ public partial class MainWindow : Window
     {
         if (_mp?.PlayingOffset.AsSeconds() < _mp?.Duration.AsSeconds() - 10)
         {
+            Program.Log($"Skipped forward 10 seconds");
             _mp?.PlayingOffset += Time.FromSeconds(10);
         }
         else
         {
+            Program.Log($"Skipped to end of track");
             _mp?.PlayingOffset = _mp.Duration;
         }
     }
@@ -333,6 +371,7 @@ public partial class MainWindow : Window
                 MessageEntry me = new();
                 await me.ShowDialog(this);
                 if (me.MessageField.Text == null) return;
+                Program.Log($"Displaying custom message");
                 ((Button)sender).Content = "Pala pealkiri";
                 _custMessage = true;
                 BigTitle.Content = me.MessageField.Text;
@@ -340,11 +379,12 @@ public partial class MainWindow : Window
             {
                 ((Button)sender).Content = "Isikupärastatud teade";
                 _custMessage = false;
+                Program.Log($"Displaying track title");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Error: " + ex.Message);
+            Program.Log("Error: " + ex.Message);
         }
     }
     private void Help_Click(object? sender, RoutedEventArgs e)
@@ -354,7 +394,7 @@ public partial class MainWindow : Window
 
     private void About_Click(object? sender, RoutedEventArgs e)
     {
-        _ = MessageBoxShow("Teeme pidu!\nNullist uuesti kirjutatud Avalonia UI ja .NET 10.0 raamistikes\nC# keeles.\n\nKasutab LibVLCSharp teeki\nVersioon 3.0 BEETA / 16.11.2026\nTegi: Markus Maal\nKogu muusika kuulub nende respektiivsetele omanikele.\nAutoriõiguste rikkumine ei ole lubatud!\n\nMis on uut?\n+ Üleminek Av2 platvormile\n* Väiksem failisuurus", "Pidu!", MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Info);
+        _ = MessageBoxShow("Teeme pidu!\nNullist uuesti kirjutatud Avalonia UI ja .NET 10.0 raamistikes\nC# keeles.\n\nKasutab SFML.Audio teeki\nVersioon 3.0 / 17.11.2026\nTegi: Markus Maal\nKogu muusika kuulub nende respektiivsetele omanikele.\nAutoriõiguste rikkumine ei ole lubatud!\n\nMis on uut?\n+ Üleminek Av2 platvormile\n+ Logimise süsteem\n* Kiirendatud käivitusaeg\n* Väiksem failisuurus", "Pidu!", MsBox.Avalonia.Enums.ButtonEnum.Ok, MsBox.Avalonia.Enums.Icon.Info);
     }
 
     // Reimplementation of WinForms MessageBox.Show
@@ -381,11 +421,12 @@ public partial class MainWindow : Window
             if (files.Count > 0)
             {
                 BackgroundImage.Source = new Bitmap(Uri.UnescapeDataString(files[0].Path.AbsolutePath));
+                Program.Log("Setting custom background");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Error: " + ex.Message);
+            Program.Log("Error: " + ex.Message);
         }
     }
     private void BigTitle_OnPropertyChanged(object? sender, AvaloniaPropertyChangedEventArgs e)
@@ -394,6 +435,7 @@ public partial class MainWindow : Window
         using var fs = new FileStream(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "/.mas/songname.txt", FileMode.Create, FileAccess.Write);
         fs.Write(Encoding.UTF8.GetBytes(BigTitle?.Content?.ToString()?.Replace("Hetkel esitusel: ", "") ?? ""));
         fs.Close();
+        Program.Log("Wrote content of BigTitle to songname.txt file");
     }
 
     private void ShowPlaylist_PointerReleased(object? sender, Avalonia.Input.PointerReleasedEventArgs e)
@@ -426,6 +468,7 @@ public partial class MainWindow : Window
         if (!(Playlist?.SelectedItems?.Count > 0)) return;
         _mp?.Stop();
         _track = Playlist.SelectedIndex;
+        Program.Log($"User requested track {new FileInfo(Playlist.Items[_track]?.ToString() ?? "").Name} to play");
         PlayTrack();
     }
 
@@ -436,13 +479,16 @@ public partial class MainWindow : Window
             _track = 0;
             PlayTrack();
             _isPlaying = true;
+            Program.Log("Track started");
         } else if (_mp?.Status == SoundStatus.Playing)
         {
             _mp.Pause();
+            Program.Log("Track paused");
         }
         else if (_mp?.Status == SoundStatus.Paused)
         {
             _mp.Play();
+            Program.Log("Resuming track");
         }
     }
 
@@ -458,6 +504,7 @@ public partial class MainWindow : Window
     private void Underscore_Click(object? sender, RoutedEventArgs e)
     {
         WindowState = WindowState.Minimized;
+        Program.Log("Window minimized");
     }
 
     private void X_Click(object? sender, RoutedEventArgs e)
@@ -472,6 +519,7 @@ public partial class MainWindow : Window
     
     private void Window_Closing(object? sender, WindowClosingEventArgs e)
     {
+        Program.Log("Closing application");
         _mp?.Dispose();
     }
 
@@ -481,6 +529,7 @@ public partial class MainWindow : Window
         TopButtons.IsVisible = !TopButtons.IsVisible;
         PlayControls.IsVisible = !PlayControls.IsVisible;
         Overlay.Opacity = (!TopButtons.IsVisible) ? 0 : 0.25;
+        Program.Log("Toggled UI visibility");
         new Thread(() =>
         {
             Thread.Sleep(500);
@@ -499,10 +548,11 @@ public partial class MainWindow : Window
         if (e.Key == Avalonia.Input.Key.F4)
         {
             _mp?.Stop();
-            _playlist = [];
+            _playlist = null;
             _track = 0;
             Playlist.Items.Clear();
             BigTitle.Content = _idleString;
+            Program.Log("Playlist deleted");
             return;
         }
         if (e.KeyModifiers == Avalonia.Input.KeyModifiers.Control)
@@ -510,7 +560,14 @@ public partial class MainWindow : Window
             switch (e.Key)
             {
                 case Avalonia.Input.Key.P:
-                    if (_mp?.Status == SoundStatus.Playing) { _mp.Pause(); } else { _mp?.Play(); }
+                    if (_mp?.Status == SoundStatus.Playing) {
+                        _mp.Pause();
+                        Program.Log("Track paused");
+                    } else
+                    {
+                        Program.Log("Resuming track");
+                        _mp?.Play();
+                    }
                     break;
                 case Avalonia.Input.Key.O:
                     AddMusic();
@@ -519,11 +576,13 @@ public partial class MainWindow : Window
                     _mp?.Stop();
                     _track--;
                     PlayTrack();
+                    Program.Log("Playing previous track");
                     break;
                 case Avalonia.Input.Key.Right:
                     _mp?.Stop();
                     _track++;
                     PlayTrack();
+                    Program.Log("Playing next track");
                     break;
             }
         } else if (e.KeyModifiers == Avalonia.Input.KeyModifiers.Alt)
@@ -532,9 +591,11 @@ public partial class MainWindow : Window
             {
                 case Avalonia.Input.Key.Left:
                     _mp?.PlayingOffset -= Time.FromSeconds(10);
+                    Program.Log("Seeked back by 10 seconds");
                     break;
                 case Avalonia.Input.Key.Right:
                     _mp?.PlayingOffset += Time.FromSeconds(10);
+                    Program.Log("Skipped forward by 10 seconds");
                     break;
             }
         }

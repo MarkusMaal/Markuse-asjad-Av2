@@ -10,15 +10,18 @@ public class App : Application
     private MainWindow? MainWindow { get; set; }
     public override void Initialize()
     {
+        Program.Log("Initializing Avalonia XAML loader");
         AvaloniaXamlLoader.Load(this);
     }
 
     public override void OnFrameworkInitializationCompleted()
     {
+        Program.Log("Initializing main window");
         MainWindow = new MainWindow();
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             Program.StreamMode = (desktop.Args ?? []).Contains("/stream");
+            Program.Log("Stream mode " + (Program.StreamMode ? "enabled" : "disabled"));
             desktop.MainWindow = MainWindow;
         }
 

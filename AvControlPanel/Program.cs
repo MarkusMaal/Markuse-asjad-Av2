@@ -139,6 +139,7 @@ class Program
         Console.Write($"\r{dateStr} ");
         Console.ResetColor();
         Console.WriteLine(message);
+        if (Debugger.IsAttached) Debug.WriteLine($"[{Assembly.GetExecutingAssembly().EntryPoint?.DeclaringType?.Namespace}] {message}");
         if (File.Exists(logFile))
         {
             File.AppendAllText(logFile, $"{dateStr} {message}\n");
