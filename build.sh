@@ -76,6 +76,9 @@ for dir in */; do
     if [[ "$op" == "AvIntegrationSoftware" ]]; then
         op="Markuse arvuti integratsioonitarkvara"
     fi
+    if [[ "$op" == "AvMarkuStationTwo" ]]; then
+        op="MarkuStation2"
+    fi
     wasrunning="false"
     # Check if process is running and stop it
     if pgrep -f "$op" >/dev/null; then

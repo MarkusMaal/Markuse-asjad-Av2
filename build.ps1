@@ -51,6 +51,9 @@ Get-ChildItem . -Directory -Exclude $exclusions | Foreach-Object {
 	if ($op -eq "AvIntegrationSoftware") {
 	    $op = "Markuse arvuti integratsioonitarkvara"
 	}
+	if ($op -eq "AvMarkuStationTwo") {
+	    $op = "MarkuStation2"
+	}
 	# we pass SilentlyContinue, otherwise PS spit errors at us if the process doesn't exist
 	$p = Get-Process -Name $op -ErrorAction SilentlyContinue
 	# check if process is running, if it is then stop it
