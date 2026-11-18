@@ -1,0 +1,81 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <ApplicationIcon>ms2.ico</ApplicationIcon>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+        <PublishAot>true</PublishAot>
+    </PropertyGroup>
+    <ItemGroup>
+        <None Remove="Resources\MarkuStation_ambient.wav" />
+        <None Remove="Resources\MarkuStation_device.wav" />
+        <None Remove="Resources\MarkuStation_legacy_animation.MP4" />
+        <None Remove="Resources\MarkuStation_logo.wav" />
+        <None Remove="Resources\MarkuStation_logo_animation.MP4" />
+        <None Remove="Resources\MarkuStation_logo_old.wav" />
+        <None Remove="Resources\MarkuStation_menu_dot.png" />
+        <None Remove="Resources\MarkuStation_menu_dot2.png" />
+        <None Remove="Resources\MarkuStation_menu_dot_white.png" />
+        <None Remove="Resources\MarkuStation_menu_enter.wav" />
+        <None Remove="Resources\MarkuStation_menu_select.wav" />
+        <None Remove="Resources\MarkuStation_startup.wav" />
+        <None Remove="Resources\MarkuStation_startup_video.MP4" />
+        <None Remove="Resources\s.png" />
+    </ItemGroup>
+    <ItemGroup>
+        <AvaloniaResource Include="Resources\MarkuStation_ambient.wav" />
+        <AvaloniaResource Include="Resources\MarkuStation_device.wav" />
+        <AvaloniaResource Include="Resources\MarkuStation_legacy_animation.MP4" />
+        <AvaloniaResource Include="Resources\MarkuStation_logo.wav" />
+        <AvaloniaResource Include="Resources\MarkuStation_logo_animation.MP4" />
+        <AvaloniaResource Include="Resources\MarkuStation_logo_old.wav" />
+        <AvaloniaResource Include="Resources\MarkuStation_menu_dot.png" />
+        <AvaloniaResource Include="Resources\MarkuStation_menu_dot2.png" />
+        <AvaloniaResource Include="Resources\MarkuStation_menu_dot_white.png" />
+        <AvaloniaResource Include="Resources\MarkuStation_menu_enter.wav" />
+        <AvaloniaResource Include="Resources\MarkuStation_menu_select.wav" />
+        <AvaloniaResource Include="Resources\MarkuStation_startup.wav" />
+        <AvaloniaResource Include="Resources\MarkuStation_startup_video.MP4" />
+        <AvaloniaResource Include="Resources\s.png" />
+        <AvaloniaResource Include="ms2.ico" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Avalonia" Version="12.1.6" />
+        <PackageReference Include="Avalonia.Desktop" Version="12.1.6" />
+        <PackageReference Include="Avalonia.Themes.Simple" Version="12.1.6" />
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="12.1.6" />
+        <PackageReference Include="AvaloniaUI.DiagnosticsSupport" Version="2.2.3">
+            <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+            <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="SFML.Audio" Version="3.0.0" />
+        <PackageReference Include="MediaPlayer.Controls" Version="12.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Resources\" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Update="Properties\Resources.Designer.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>Resources.resx</DependentUpon>
+        </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Update="Properties\Resources.resx">
+            <Generator>ResXFileCodeGenerator</Generator>
+            <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="mas.ico" />
+        <Content Include="ms2.ico" />
+    </ItemGroup>
+</Project>

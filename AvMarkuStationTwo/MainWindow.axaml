@@ -1,0 +1,104 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:controls="clr-namespace:MediaPlayer.Controls;assembly=MediaPlayer.Controls"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        WindowState="FullScreen"
+        x:Class="AvMarkuStationTwo.MainWindow" Background="Black"
+        Title="MarkuStation 2" Foreground="White" Loaded="Window_Loaded" KeyDown="Window_KeyDown"
+        Closing="Window_Closing">
+    <Grid>
+    <Panel>
+      <controls:GpuMediaPlayer
+        Name="VideoPlayer"
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        LayoutMode="Fit"
+        Volume="100"
+        PreferDirectGpuTextureUpload="True" />
+    </Panel>
+    <StackPanel Name="FunkyDots" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Center">
+      <Image Name="Dot1" Source="/Resources/MarkuStation_menu_dot2.png" Width="86" Height="86" Margin="-400,0,0,0" Opacity="0">
+        <Image.RenderTransform>
+          <RotateTransform Angle="10" CenterX="200" />
+        </Image.RenderTransform>
+      </Image>
+      <Image Name="Dot2" Source="/Resources/MarkuStation_menu_dot2.png" Width="86" Height="86" Margin="-400,0,0,0" Opacity="0">
+        <Image.RenderTransform>
+          <RotateTransform Angle="20" CenterX="200" />
+        </Image.RenderTransform>
+      </Image>
+      <Image Name="Dot3" Source="/Resources/MarkuStation_menu_dot2.png" Width="86" Height="86" Margin="-400,0,0,0" Opacity="0">
+        <Image.RenderTransform>
+          <RotateTransform Angle="30" CenterX="200" />
+        </Image.RenderTransform>
+      </Image>
+      <Image Name="Dot4" Source="/Resources/MarkuStation_menu_dot2.png" Width="86" Height="86" Margin="-400,0,0,0" Opacity="0">
+        <Image.RenderTransform>
+          <RotateTransform Angle="40" CenterX="200" />
+        </Image.RenderTransform>
+      </Image>
+    </StackPanel>
+    <!-- Main menu -->
+    <Panel>
+      <StackPanel Name="Menu" HorizontalAlignment="Center" VerticalAlignment="Center" Classes="MainMenu" IsVisible="False">
+        <Label Name="BrowserSel" HorizontalContentAlignment="Center" Foreground="DeepSkyBlue">Brauser</Label>
+        <Label Name="ConfigSel" HorizontalContentAlignment="Center">Konfiguratsioon</Label>
+      </StackPanel>
+      <StackPanel Name="MenuHotkeys" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Classes="HotkeyLabels" IsVisible="False" Margin="0,0,15,10">
+        <Label Name="KeyReturn" Margin="10,0">RETURN - Sisene</Label>
+        <Label Name="KeyEsc">ESC - Versioon</Label>
+      </StackPanel>
+    </Panel>
+    <!-- Version -->
+    <Panel Name="Version" Opacity="0">
+      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Name="VersionContent">
+        <Label HorizontalAlignment="Center" FontSize="50">Versioon</Label>
+        <Label HorizontalAlignment="Center" FontSize="25">Tarkvara: 1.0i</Label>
+        <Label HorizontalAlignment="Center" FontSize="25">M.S. 1.0 draiver: 0.0</Label>
+        <Label HorizontalAlignment="Center" FontSize="25">Platvorm: Avalonia UI</Label>
+        <Label HorizontalAlignment="Center" FontSize="25">Brauser: 1.0</Label>
+        <Label HorizontalAlignment="Center" FontSize="25">Video pleier: MediaPlayer.Controls 12.0</Label>
+      </StackPanel>
+      <Label Name="ConfigContent" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25">Konfigureerimiseks kasutage Markuse arvuti juhtpaneeli</Label>
+      <StackPanel Name="BottomRightText1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Classes="HotkeyLabels" Margin="0,0,15,10">
+      <Label>Vajutage suvalist klahvi, et jätkata</Label>
+      </StackPanel>
+    </Panel>
+    <!-- Browser -->
+    <Panel Name="Browser" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Opacity="0" IsVisible="False">
+      <Panel.Background>
+        <LinearGradientBrush StartPoint="0,0" >
+          <LinearGradientBrush.Transform>
+            <RotateTransform Angle="45"></RotateTransform>
+          </LinearGradientBrush.Transform>
+          <GradientStop Color="#2D9FFF" Offset="0.0"/>
+          <GradientStop Color="#A8F3FF" Offset="1.0"/>
+        </LinearGradientBrush>
+      </Panel.Background>
+      <Label Name="BrowserTitle" FontSize="32" Margin="20">Brauser (MarkuStation 2)</Label>
+      <Label Name="GameName" FontSize="32" Margin="20" HorizontalAlignment="Right" Foreground="#FFF0FF00" BorderBrush="Orange" IsVisible="False">
+       Mängu nimi
+      </Label>
+      <WrapPanel Name="GamePanel" VerticalAlignment="Center" HorizontalAlignment="Center">
+        <Label FontSize="28" Name="NoData" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="True">Andmeid pole</Label>
+        <!--<Image Source="/Resources/s.png" Width="64" Margin="20"></Image>-->
+      </WrapPanel>
+      <StackPanel Name="BottomRightText2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Bottom" Classes="HotkeyLabels" Margin="0,0,15,10">
+        <Label Name="BrowserKeyReturn" Margin="10,0">RETURN - Sisene</Label>
+        <Label Name="BrowserKeyBack">ESC - Tagasi</Label>
+      </StackPanel>
+      <Image Name="WhiteDot" Source="avares://AvMarkuStationTwo/Resources/MarkuStation_menu_dot_white.png" VerticalAlignment="Top" HorizontalAlignment="Center" Width="64" Height="64"></Image>
+    </Panel>
+    <Label HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="False">Palun oota...</Label>
+  </Grid>
+  <Window.Styles>
+    <Style Selector="StackPanel.MainMenu > Label">
+      <Setter Property="FontSize" Value="32"></Setter>
+    </Style>
+    <Style Selector="StackPanel.HotkeyLabels > Label">
+      <Setter Property="FontSize" Value="20"></Setter>
+    </Style>
+  </Window.Styles>
+</Window>
