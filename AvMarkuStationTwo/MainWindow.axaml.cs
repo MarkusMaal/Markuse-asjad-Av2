@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Media.Imaging;
 using Avalonia.Threading;
@@ -39,20 +40,167 @@ public partial class MainWindow : Window
     private int _sel;
     private bool _invert;
     private int _circleOffset;
-    private readonly bool _running;
-    private readonly bool _nodata = true;
+    private bool _running;
+    private bool _nodata = true;
     private int _browserIdx = -1;
     private readonly Random _rand = new();
 
-    private readonly bool _playIntros = true;   // displays the "Markuse arvuti meelelahutus" screen on start and a logo animation when launching a game
-    private readonly bool _legacyIntro; // displays the MarkuStation 1 logo when launching a game
+    private bool _playIntros = true;   // displays the "Markuse arvuti meelelahutus" screen on start and a logo animation when launching a game
+    private bool _legacyIntro; // displays the MarkuStation 1 logo when launching a game
 
     private DispatcherTimer _moveCircle = new();
     private readonly IDictionary<string, string> _msGames = new Dictionary<string, string>();
     public MainWindow()
     {
         InitializeComponent();
-        if (Design.IsDesignMode) return;
+    }
+
+
+    private void MoveCircle(Point p, bool slowly = false)
+    {
+        var whiteDot = WhiteDot;
+        if (slowly)
+        {
+            if ((_moveCircle.IsEnabled))
+            {
+                _moveCircle.Stop();
+            }
+            _moveCircle.Interval = new TimeSpan(64000);
+            _moveCircle.Tick += (_, _) =>
+            {
+                var adjusted = false;
+                var marginX = whiteDot.Margin.Left;
+                var marginY = whiteDot.Margin.Top;
+                if (whiteDot.Margin.Left < p.X)
+                {
+                    marginX += 1;
+                    adjusted = true;
+                }
+                else if (whiteDot.Margin.Left > p.X)
+                {
+                    marginX += -1;
+                    adjusted = true;
+                }
+                if (whiteDot.Margin.Top < p.Y)
+                {
+                    marginY += 1;
+                    adjusted = true;
+                }
+                else if (whiteDot.Margin.Top > p.Y)
+                {
+                    marginY += -1;
+                    adjusted = true;
+                }
+                if (adjusted)
+                {
+                    whiteDot.Margin = new Thickness(marginX, marginY, 0, 0);
+                } else
+                {
+                    _moveCircle.Stop();
+                    _moveCircle = new DispatcherTimer();
+                }
+            };
+            _moveCircle.Start();
+        } else
+        {
+            whiteDot.Margin = new Thickness(p.X, p.Y, 0, 0);
+        }
+    }
+
+    private static Point GetAbsolutePosition(Control control) // ChatGPT helped a bit with this
+    {
+        if (GetTopLevel(control) is not Control topLevel)
+        {
+            return new Point(0, 0);
+        }
+        var transform = control.TransformToVisual(topLevel);
+        return transform?.Transform(new Point(0,0)) ?? new Point(0, 0);
+    }
+
+    private void MoveCircle()
+    {
+        var whiteDot = WhiteDot;
+        if (_nodata)
+        {
+            if (!_invert)
+            {
+                whiteDot.RenderTransform = new TranslateTransform(_circleOffset, _circleOffset);
+                _circleOffset += 1;
+                if (!(_circleOffset > Height + whiteDot.Height)) return;
+                _invert = !_invert;
+                whiteDot.Margin = new Thickness(0, 0, -Width / 4, 0);
+            }
+            else
+            {
+                whiteDot.RenderTransform = new TranslateTransform(-_circleOffset, _circleOffset);
+                _circleOffset -= 1;
+                if (!(_circleOffset < -whiteDot.Height)) return;
+                _invert = !_invert;
+                whiteDot.Margin = new Thickness(-Width / 2, 0, 0, 0);
+            }
+        }
+        else
+        {
+            if (!_invert)
+            {
+                _circleOffset += 1;
+                if (_circleOffset > 100)
+                {
+                    _invert = !_invert;
+                    _circleOffset = 100;
+                }
+
+                whiteDot.Opacity = _circleOffset / 100.0;
+            }
+            else
+            {
+                _circleOffset -= 1;
+                if (_circleOffset < 0)
+                {
+                    _invert = !_invert;
+                    _circleOffset = 0;
+                }
+
+                whiteDot.Opacity = _circleOffset / 100.0;
+            }
+        }
+    }
+
+    private void RotateCircle()
+    {
+        _angle += _rand.Next(1, 3);
+        _angle = _angle > 359 ? _angle - 360 : _angle;
+        _angle2 += _rand.Next(1, 3);
+        _angle2 = _angle2 > 359 ? _angle2 - 360 : _angle2;
+        _angle3 += _rand.Next(1, 3);
+        _angle3 = _angle3 > 359 ? _angle3 - 360 : _angle3;
+        _angle4 += _rand.Next(1, 3);
+        _angle4 = _angle4 > 359 ? _angle4 - 360 : _angle4;
+        Dot1.RenderTransform = new RotateTransform(_angle, 200, 0);
+        Dot2.RenderTransform = new RotateTransform(_angle2, 200, 0);
+        Dot3.RenderTransform = new RotateTransform(_angle3, 200, 0);
+        Dot4.RenderTransform = new RotateTransform(_angle4, 200, 0);
+    }
+
+    private static byte[] GetStreamBytes(UnmanagedMemoryStream ms)
+    {
+        var i = 0;
+        using var umm = ms;
+        var buffer = umm.ReadByte();
+        var bytes = new byte[umm.Length];
+        while (buffer > -1)
+        {
+            bytes[i] = (byte)buffer;
+            i++;
+            buffer = umm.ReadByte();
+        }
+        umm.Close();
+
+        return bytes;
+    }
+
+    private void InitMarkuStation()
+    {
         if (!Directory.Exists(_masRoot))
         {
             Directory.CreateDirectory(_masRoot);
@@ -92,6 +240,10 @@ public partial class MainWindow : Window
             var settings = File.ReadAllText(_masRoot + "/setting.txt", Encoding.UTF8).Split("\n");
             _playIntros = settings[2] == "true"; // this is true if intros are allowed in cpanel
             _legacyIntro = (settings.Length > 3) && (settings[3] == "true"); // we check length for backwards compatibility reasons
+            if (_legacyIntro)
+            {
+                Ms1DrvLabel.Content = "M.S. 1.0 draiver: 1.0";
+            }
             if (!_playIntros)
             {
                 VideoPlayer.IsVisible = false;
@@ -215,19 +367,67 @@ public partial class MainWindow : Window
                             {
                                 var noDataLabel = NoData;
                                 GamePanel.Children.Clear();
-                                Bitmap icon;
-                                using (var ms = new MemoryStream(Properties.Resources.MarkuStation_awesome))
-                                {
-                                    icon = new Bitmap(ms);
-                                }
+                                
                                 foreach (var kvp in _msGames)
                                 {
+                                    Bitmap icon;
+                                    using (var ms = new MemoryStream(Properties.Resources.MarkuStation_awesome))
+                                    {
+                                        icon = new Bitmap(ms);
+                                        ms.Close();
+                                    }
+                                    var iconFound = false;
+                                    if (OperatingSystem.IsLinux())
+                                    {
+                                        foreach (var di in new DirectoryInfo("/usr/share/icons/hicolor")
+                                                     .EnumerateDirectories())
+                                        {
+                                            if (di.Name.Equals("scalable",
+                                                    StringComparison.InvariantCultureIgnoreCase)) continue;
+                                            foreach (var fi in new DirectoryInfo(Path.Join(di.FullName, "apps"))
+                                                         .EnumerateFiles())
+                                            {
+                                                if (!fi.Name.Contains(kvp.Key,
+                                                        StringComparison.InvariantCultureIgnoreCase)) continue;
+                                                iconFound = true;
+                                                using var fs = new FileStream(fi.FullName, FileMode.Open,
+                                                    FileAccess.Read);
+                                                icon = new Bitmap(fs);
+                                                fs.Close();
+                                                if (icon.PixelSize.Width < 128)
+                                                {
+                                                    iconFound = false;
+                                                    continue;
+                                                }
+                                                break;
+                                            }
+
+                                            if (iconFound) break;
+                                        }
+                                    }
+
+                                    if (!iconFound && Directory.Exists(Path.Join(_masRoot, "ms_icons")))
+                                    {
+                                        foreach (var fi in new DirectoryInfo(Path.Join(_masRoot, "ms_icons")).EnumerateFiles())
+                                        {
+                                            if (!fi.Name.Contains(kvp.Key,
+                                                    StringComparison.InvariantCultureIgnoreCase)) continue;
+                                            using var fs = new FileStream(fi.FullName, FileMode.Open,
+                                                FileAccess.Read);
+                                            icon = new Bitmap(fs);
+                                            fs.Close();
+                                            break;
+                                        }
+                                    }
                                     Image sImage = new()
                                     {
                                         Source = icon,
                                         Margin = new Thickness(20),
-                                        Width = 64,
-                                        Name = kvp.Key,
+                                        Width = _msGames.Count < 4 ? 256 : _msGames.Count < 8 ? 128 : 64,
+                                        Stretch = Stretch.Uniform,
+                                        VerticalAlignment = VerticalAlignment.Center,
+                                        HorizontalAlignment = HorizontalAlignment.Center,
+                                        Name = kvp.Key
                                     };
 
                                     GamePanel.Children.Add(sImage);
@@ -238,6 +438,7 @@ public partial class MainWindow : Window
                                 GameName.Content = _msGames.First().Key;
                                 WhiteDot.HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Left;
                                 WhiteDot.VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top;
+                                WhiteDot.Height = _msGames.Count < 4 ? 256 : _msGames.Count < 8 ? 128 : 64;
                             }
                         }
                         break;
@@ -290,7 +491,9 @@ public partial class MainWindow : Window
                                 Image firstEl = (Image)GamePanel.Children[0];
                                 MoveCircle(GetAbsolutePosition(firstEl));
                             }
-                            WhiteDot.ZIndex = -1;
+                            WhiteDot.ZIndex = 99;
+                            WhiteDot.Height = _msGames.Count < 4 ? 256 : _msGames.Count < 8 ? 128 : 64;
+                            WhiteDot.Width = WhiteDot.Height;
                             Browser.Opacity = 1;
                             CurrentMenu = "browser";
                         }
@@ -404,152 +607,9 @@ public partial class MainWindow : Window
             };
     }
 
-
-    private void MoveCircle(Point p, bool slowly = false)
-    {
-        if (slowly)
-        {
-            if ((_moveCircle.IsEnabled))
-            {
-                _moveCircle.Stop();
-            }
-            _moveCircle.Interval = new TimeSpan(64000);
-            _moveCircle.Tick += (_, _) =>
-            {
-                var adjusted = false;
-                var marginX = WhiteDot.Margin.Left;
-                var marginY = WhiteDot.Margin.Top;
-                if (WhiteDot.Margin.Left < p.X)
-                {
-                    marginX += 1;
-                    adjusted = true;
-                }
-                else if (WhiteDot.Margin.Left > p.X)
-                {
-                    marginX += -1;
-                    adjusted = true;
-                }
-                if (WhiteDot.Margin.Top < p.Y)
-                {
-                    marginY += 1;
-                    adjusted = true;
-                }
-                else if (WhiteDot.Margin.Top > p.Y)
-                {
-                    marginY += -1;
-                    adjusted = true;
-                }
-                if (adjusted)
-                {
-                    WhiteDot.Margin = new Thickness(marginX, marginY, 0, 0);
-                } else
-                {
-                    _moveCircle.Stop();
-                    _moveCircle = new DispatcherTimer();
-                }
-            };
-            _moveCircle.Start();
-        } else
-        {
-            WhiteDot.Margin = new Thickness(p.X, p.Y, 0, 0);
-        }
-    }
-
-    private static Point GetAbsolutePosition(Control control) // ChatGPT helped a bit with this
-    {
-        if (GetTopLevel(control) is not Control topLevel)
-        {
-            return new Point(0, 0);
-        }
-        var transform = control.TransformToVisual(topLevel);
-        return transform?.Transform(new Point(0,0)) ?? new Point(0, 0);
-    }
-
-    private void MoveCircle()
-    {
-        if (_nodata)
-        {
-            if (!_invert)
-            {
-                WhiteDot.RenderTransform = new TranslateTransform(_circleOffset, _circleOffset);
-                _circleOffset += 1;
-                if (!(_circleOffset > Height + WhiteDot.Height)) return;
-                _invert = !_invert;
-                WhiteDot.Margin = new Thickness(0, 0, -Width / 4, 0);
-            }
-            else
-            {
-                WhiteDot.RenderTransform = new TranslateTransform(-_circleOffset, _circleOffset);
-                _circleOffset -= 1;
-                if (!(_circleOffset < -WhiteDot.Height)) return;
-                _invert = !_invert;
-                WhiteDot.Margin = new Thickness(-Width / 2, 0, 0, 0);
-            }
-        } else
-        {
-            if (!_invert)
-            {
-                _circleOffset += 1;
-                if (_circleOffset > 100)
-                {
-                    _invert = !_invert;
-                    _circleOffset = 100;
-                }
-                WhiteDot.Opacity = _circleOffset / 100.0;
-            }
-            else
-            {
-                _circleOffset -= 1;
-                if (_circleOffset < 0)
-                {
-                    _invert = !_invert;
-                    _circleOffset = 0;
-                }
-                WhiteDot.Opacity = _circleOffset / 100.0;
-            }
-        }
-    }
-
-    private void RotateCircle()
-    {
-        _angle += _rand.Next(1, 3);
-        _angle = _angle > 359 ? _angle - 360 : _angle;
-        _angle2 += _rand.Next(1, 3);
-        _angle2 = _angle2 > 359 ? _angle2 - 360 : _angle2;
-        _angle3 += _rand.Next(1, 3);
-        _angle3 = _angle3 > 359 ? _angle3 - 360 : _angle3;
-        _angle4 += _rand.Next(1, 3);
-        _angle4 = _angle4 > 359 ? _angle4 - 360 : _angle4;
-        Dot1.RenderTransform = new RotateTransform(_angle, 200, 0);
-        Dot2.RenderTransform = new RotateTransform(_angle2, 200, 0);
-        Dot3.RenderTransform = new RotateTransform(_angle3, 200, 0);
-        Dot4.RenderTransform = new RotateTransform(_angle4, 200, 0);
-    }
-
-    private static byte[] GetStreamBytes(UnmanagedMemoryStream ms)
-    {
-        var i = 0;
-        using var umm = ms;
-        var buffer = umm.ReadByte();
-        var bytes = new byte[umm.Length];
-        while (buffer > -1)
-        {
-            bytes[i] = (byte)buffer;
-            i++;
-            buffer = umm.ReadByte();
-        }
-        umm.Close();
-
-        return bytes;
-    }
-
     private void Window_Loaded(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        Program.Log("Initializing startup sequence");
-        _timer.Start();
-        _mp2 = new Music(_masRoot + "/_temp.wav");
-        VideoPlayer.Source = new Uri(_masRoot + "/_temp.mp4");
-
+        if (Design.IsDesignMode) return;
         // hide mouse cursor
         new Thread(() =>
         {
@@ -560,10 +620,23 @@ public partial class MainWindow : Window
                     Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.None));
             }
         }).Start();
-        if (!_running || !_playIntros) return;
-        Program.Log("Playing MCE video");
-        VideoPlayer.Play();
-        _mp2.Play();
+        new Thread(() =>
+        {
+            Thread.Sleep(150);
+            Dispatcher.UIThread.Post(() =>
+            {
+                InitMarkuStation();
+                Program.Log("Initializing startup sequence");
+                _timer.Start();
+                _mp2 = new Music(_masRoot + "/_temp.wav");
+                VideoPlayer.Source = new Uri(_masRoot + "/_temp.mp4");
+
+                if (!_running || !_playIntros) return;
+                Program.Log("Playing MCE video");
+                VideoPlayer.Play();
+                _mp2.Play();
+            });
+        }).Start();
     }
 
     private void Navigate(Avalonia.Input.Key key)
@@ -656,6 +729,12 @@ public partial class MainWindow : Window
             } else
             {
                 VersionContent.IsVisible = false;
+                StringBuilder sb = new();
+                sb.AppendLine("MarkuStation 1 alasüsteem: " + (_legacyIntro ? "Lubatud" : "Keelatud"));
+                sb.AppendLine("Introde esitamine: " + (_playIntros ? "Lubatud" : "Keelatud"));
+                sb.AppendLine($"Konfiguratsiooni asukoht: {_masRoot}");
+
+                ConfigContent.Content = sb.ToString();
                 ConfigContent.IsVisible = true;
                 CurrentMenu = "enter_version";
             }

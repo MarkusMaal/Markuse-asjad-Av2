@@ -55,10 +55,10 @@
     <Panel Name="Version" Opacity="0">
       <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Name="VersionContent">
         <Label HorizontalAlignment="Center" FontSize="50">Versioon</Label>
-        <Label HorizontalAlignment="Center" FontSize="25">Tarkvara: 1.0i</Label>
-        <Label HorizontalAlignment="Center" FontSize="25">M.S. 1.0 draiver: 0.0</Label>
+        <Label HorizontalAlignment="Center" FontSize="25">Tarkvara: 1.1i</Label>
+        <Label HorizontalAlignment="Center" FontSize="25" Name="Ms1DrvLabel">M.S. 1.0 draiver: 0.0</Label>
         <Label HorizontalAlignment="Center" FontSize="25">Platvorm: Avalonia UI</Label>
-        <Label HorizontalAlignment="Center" FontSize="25">Brauser: 1.0</Label>
+        <Label HorizontalAlignment="Center" FontSize="25">Brauser: 1.1</Label>
         <Label HorizontalAlignment="Center" FontSize="25">Video pleier: MediaPlayer.Controls 12.0</Label>
       </StackPanel>
       <Label Name="ConfigContent" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25">Konfigureerimiseks kasutage Markuse arvuti juhtpaneeli</Label>
@@ -89,7 +89,7 @@
         <Label Name="BrowserKeyReturn" Margin="10,0">RETURN - Sisene</Label>
         <Label Name="BrowserKeyBack">ESC - Tagasi</Label>
       </StackPanel>
-      <Image Name="WhiteDot" Source="avares://AvMarkuStationTwo/Resources/MarkuStation_menu_dot_white.png" VerticalAlignment="Top" HorizontalAlignment="Center" Width="64" Height="64"></Image>
+      <Image Stretch="Uniform" Name="WhiteDot" Source="avares://AvMarkuStationTwo/Resources/MarkuStation_menu_dot_white.png" VerticalAlignment="Top" HorizontalAlignment="Center" Width="64" Height="64"></Image>
     </Panel>
     <Label HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="False">Palun oota...</Label>
   </Grid>
